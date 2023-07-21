@@ -14,14 +14,28 @@ class Synonym(models.Model):
     def __str__(self):
         return self.name
     
-class NutrientBulk(models.Model):
+class Supplement(models.Model):
     name = models.CharField(max_length=200)
-    nutrients = models.ManyToManyField(Nutrient, through='NutrientDosage')
+    nutrients = models.ManyToManyField(Nutrient, through='SupplementNutrient')
 
     def __str__(self):
         return self.name
     
-class NutrientDosage(models.Model):
+class SupplementNutrient(models.Model):
     nutrient = models.ForeignKey(Nutrient, on_delete=models.CASCADE)
-    nutrientberk = models.ForeignKey(NutrientBulk, on_delete=models.CASCADE)
+    supplement = models.ForeignKey(Supplement, on_delete=models.CASCADE)
+    dosage = models.FloatField(default=0.0)
+
+class RecommendedIntake(models.Model):
+    gender = models.CharField(max_length=1, choices=[('M', 'Male'), ('F', 'Female')])
+    age_start = models.IntegerField()  # 시작 나이
+    age_end = models.IntegerField()    # 끝나는 나이
+    pregnant = models.BooleanField()
+    breastfeeding = models.BooleanField()
+
+    nutrients = models.ManyToManyField(Nutrient, through='RecommendedNutrient')
+
+class RecommendedNutrient(models.Model):
+    nutrient = models.ForeignKey(Nutrient, on_delete=models.CASCADE)
+    recommended_intake = models.ForeignKey(RecommendedIntake, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
