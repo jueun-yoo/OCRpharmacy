@@ -26,16 +26,16 @@ class SupplementNutrient(models.Model):
     supplement = models.ForeignKey(Supplement, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
 
-class RecommendedIntake(models.Model):
-    gender = models.CharField(max_length=1, choices=[('M', 'Male'), ('F', 'Female')])
+class RecommendedNutrient(models.Model):
+    gender = models.CharField(max_length=1, choices=[('M', '남성'), ('F', '여성')])
     age_start = models.IntegerField()  # 시작 나이
     age_end = models.IntegerField()    # 끝나는 나이
     pregnant = models.BooleanField()
     breastfeeding = models.BooleanField()
 
-    nutrients = models.ManyToManyField(Nutrient, through='RecommendedNutrient')
+    nutrients = models.ManyToManyField(Nutrient, through='RecommendedIntake')
 
-class RecommendedNutrient(models.Model):
+class RecommendedIntake(models.Model):
     nutrient = models.ForeignKey(Nutrient, on_delete=models.CASCADE)
-    recommended_intake = models.ForeignKey(RecommendedIntake, on_delete=models.CASCADE)
+    recommended_intake = models.ForeignKey(RecommendedNutrient, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
