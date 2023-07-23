@@ -9,18 +9,9 @@ class User(AbstractUser):
     pregnant = models.BooleanField(default=False)
     breastfeeding = models.BooleanField(default=False)
 
-    recommended = models.ForeignKey('supplements.RecommendedIntake', on_delete=models.SET_NULL, null=True, related_name='users')
+    recommended = models.OneToOneField('supplements.RecommendedIntake', on_delete=models.SET_NULL, null=True, related_name='users')
     intake = models.ManyToManyField('supplements.Nutrient', through='UserIntake')
 
-#사용자의 영양제를 의미함. 영양제 데이터와 사용자의 데이터를 연결해서
-#따로 중간table을 만든 이유는 영양제 이름 때매.. 뭐 저장한 시각도 추가시킬 수 있음
-class UserSupplement(models.Model):
-    name = models.CharField(max_length=100)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='user_supplements')
-    supplement = models.ForeignKey('supplements.Supplement', on_delete=models.CASCADE, related_name='user_supplements')
-
-    def __str__(self):
-        return f'{self.user.username} - {self.supplement.name}'
 
 class UserIntake(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)

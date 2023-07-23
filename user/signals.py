@@ -1,19 +1,21 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
-from supplements.models import RecommendedNutrient  # 적정영양소 모델 불러오기
+from supplements.models import RecommendedIntake  # 적정영양소 모델 불러오기
+
+User = get_user_model()
 
 @receiver(post_save, sender=User)
-def assign_nutrition_pk(sender, instance=None, created=False, **kwargs):
+def assign_recommended_intake(sender, instance=None, created=False, **kwargs):
     if created:
-        recommended = RecommendedNutrient.objects.filter(
+        recommended = RecommendedIntake.objects.filter(
             age=instance.age, 
             gender=instance.gender,
             breastfeeding=instance.breastfeeding,
             pregnancy=instance.pregnancy
         ).first()
 
-        if RecommendedNutrient:
-            instance.recommended = RecommendedNutrient.pk
+        if RecommendedIntake:
+            instance.recommended = recommended
             instance.save()

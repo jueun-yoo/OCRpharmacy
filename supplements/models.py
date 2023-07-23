@@ -14,10 +14,11 @@ class Synonym(models.Model):
     name = models.CharField(max_length=200)
 
     def __str__(self):
-        return self.synonym
+        return self.name
 
-#영양제 데이터, 영양제 이름과 여러개의 영양소 연결
+#영양제 데이터, 영양제 이름과 여러개의 영양소, 그리고 입력한 사용자 연결
 class Supplement(models.Model):
+    user = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='supplement')
     name = models.CharField(max_length=200)
     nutrients = models.ManyToManyField(Nutrient, through='SupplementNutrient')
 
