@@ -3,4 +3,4 @@ from . import views
 
 app_name = 'user'
 
-urlpatterns = []
+urlpatterns = [path('',views.index, name='index'),]
