@@ -10,13 +10,11 @@ class User(AbstractUser):
     breastfeeding = models.BooleanField(default=False)
 
     recommended = models.OneToOneField('supplements.RecommendedIntake', on_delete=models.SET_NULL, null=True, related_name='users')
-    intake = models.ManyToManyField('supplements.Nutrient', through='UserIntake')
+    totalintake = models.ManyToManyField('supplements.Nutrient', through='UserTotalIntake')
 
-
-class UserIntake(models.Model):
+class UserTotalIntake(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     nutrient = models.ForeignKey('supplements.Nutrient', on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
-
 
 #누적에 대한 정의는 여기 말고 view에서 하기로 해요..
