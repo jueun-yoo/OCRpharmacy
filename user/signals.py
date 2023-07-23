@@ -10,7 +10,8 @@ User = get_user_model()
 def assign_recommended_intake(sender, instance=None, created=False, **kwargs):
     if created:
         recommended = RecommendedIntake.objects.filter(
-            age=instance.age, 
+            age_start__gte=instance.age,
+            age_end__lte=instance.age,
             gender=instance.gender,
             breastfeeding=instance.breastfeeding,
             pregnancy=instance.pregnancy
