@@ -53,6 +53,10 @@ def update_nutrient_details(name, new_details):
     conn.commit()
 
 # 데이터 수정 예시
+update_nutrient_details("에너지", ".")
+update_nutrient_details("단백질", ".")
+update_nutrient_details("식이섬유", ".")
+update_nutrient_details("수분", ".")
 update_nutrient_details("비타민A", "과복용 시: 뇌척수압 상승, 어지러움, 구토, 피부자극, 관절통증흡연자의 경우 다량복용시 폐암 유발. \n영양소 궁합(Bad): 베타카로틴 영양제랑 같이 복용하지 않는 것이 좋음. \n스테로이드, 프레드니솔론과 함께 복용 시 칼슘흡수 방해, 비타민D 활성화 억제, 골밀도 감소가 우려됨. \n제니칼(비만 치료제), 콜레스티라민은 비타민A 등 지용성 비타민의 흡수가 저해될 수 있음. \n페노바르비탈, 페니토인(간질약)은 비타민의 분해를 촉진하고 흡수를 감소시킴.")
 update_nutrient_details("비타민D", "과복용 시: 식욕부진, 당뇨, 부정맥, 혈관 조직 석회화가 우려. \n영양소 궁합(Good): 칼슘과 함께 복용하면 칼슘의 흡수율을 높이는 데 도움을 준다.")
 update_nutrient_details("비타민E", "과복용 시: 폐암 사망 확률이 높아진다. \n영양소 궁합(Good): 비타민E는 오메가3 지방산과 같이 섭취하게 되면 오메가3 지방산의 흡수율을 높인다. \n영양소 궁합(Bad): 비타민K와 비타민E는 서로 상충되는 작용을 한다.")
