@@ -5,13 +5,13 @@ conn = sqlite3.connect('db.sqlite3')  # 파일명은 실제 파일의 경로를 
 
 # 커서 생성
 cursor = conn.cursor()
-"""
+
 # 데이터 추가
 def add_supplements_nutrient(name, details):
     sql = "INSERT INTO supplements_nutrient (name, details) VALUES (?, ?)"
     cursor.execute(sql, (name, details))
     conn.commit()
-
+"""
 # 데이터 추가 예시
 add_supplements_nutrient("에너지", ".")
 add_supplements_nutrient("단백질", ".")
@@ -46,6 +46,7 @@ add_supplements_nutrient("셀레늄", ".")
 add_supplements_nutrient("몰데브덴", ".")
 # 원하는 만큼 데이터를 추가할 수 있습니다.
 """
+
 # 데이터 수정
 def update_nutrient_details(name, new_details):
     sql = "UPDATE supplements_nutrient SET details = ? WHERE name = ?"
