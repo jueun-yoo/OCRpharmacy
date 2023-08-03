@@ -1,54 +1,66 @@
-<!-- templates/registration/signup.html -->
+{% load crispy_forms_tags %}
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <style>
+        #extra-fields {
+            display: none; /* 기본적으로 숨김 */
+        }
+    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>회원가입</title>
-    <!-- 부트스트랩 CSS 파일을 CDN으로 가져옴 -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="container">
-        <h1>회원가입</h1>
-        <form method="post">
-            {% csrf_token %}
-            <!-- 부트스트랩을 사용하여 폼 스타일 적용 -->
-            <div class="form-group">
-                {{ form.username.label_tag }}
-                {{ form.username }}
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <h1 class="mb-4 text-center" style="font-size: 30px;">회원가입</h1>
+                <form method="post" id="signup-form">
+                    {% csrf_token %}
+                    {{ form.username|as_crispy_field }}
+                    {{ form.password1|as_crispy_field }}
+                    {{ form.password2|as_crispy_field }}
+                    {{ form.name|as_crispy_field }}
+                    {{ form.age|as_crispy_field }}
+                    {{ form.gender|as_crispy_field }}
+                    <div id="extra-fields" class="row">
+                        <div class="col">
+                            {{ form.pregnant|as_crispy_field }}
+                        </div>
+                        <div class="col">
+                            {{ form.breastfeeding|as_crispy_field }}
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">가입</button>
+                </form>
             </div>
-            <div class="form-group">
-                {{ form.password1.label_tag }}
-                {{ form.password1 }}
-            </div>
-            <div class="form-group">
-                {{ form.password2.label_tag }}
-                {{ form.password2 }}
-            </div>
-            <div class="form-group">
-                {{ form.name.label_tag }}
-                {{ form.name }}
-            </div>
-            <div class="form-group">
-                {{ form.age.label_tag }}
-                {{ form.age }}
-            </div>
-            <div class="form-group">
-                {{ form.gender.label_tag }}
-                {{ form.gender }}
-            </div>
-            <div class="form-group">
-                {{ form.pregnant.label_tag }}
-                {{ form.pregnant }}
-            </div>
-            <div class="form-group">
-                {{ form.breastfeeding.label_tag }}
-                {{ form.breastfeeding }}
-            </div>
-            <button type="submit" class="btn btn-primary">회원가입</button>
-        </form>
+        </div>
     </div>
 
-    <!-- 부트스트랩 JS 파일을 CDN으로 가져옴 (템플릿 하단에 위치하는 것이 좋음) -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        var genderField = document.getElementById('id_gender');
+        var extraFields = document.getElementById('extra-fields');
+
+        // 페이지 로드 시 초기 상태 설정
+        if (genderField.value !== 'F') {
+            extraFields.style.display = 'none';
+        }
+
+        // 성별 선택 변경 시 동작
+        genderField.addEventListener('change', function() {
+            if (this.value === 'F') {
+                extraFields.style.display = 'flex';
+            } else {
+                extraFields.style.display = 'none';
+            }
+        });
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
 </body>
 </html>
