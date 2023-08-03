@@ -5,13 +5,13 @@ conn = sqlite3.connect('db.sqlite3')  # 파일명은 실제 파일의 경로를 
 
 # 커서 생성
 cursor = conn.cursor()
-"""
+
 # 데이터 추가
 def add_supplements_recommendedintake(gender, age_start, age_end, pregnant, breastfeeding):
     sql = "INSERT INTO supplements_recommendedintake (gender, age_start, age_end, pregnant, breastfeeding) VALUES (?, ?, ?, ?, ?)"
     cursor.execute(sql, (gender, age_start, age_end, pregnant, breastfeeding))
     conn.commit()
-
+"""
 # 데이터 추가 예시
 add_supplements_recommendedintake("남", 6, 8, False, False)
 add_supplements_recommendedintake("남", 9, 11, False, False)
