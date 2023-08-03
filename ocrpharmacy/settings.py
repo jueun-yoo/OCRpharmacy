@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-&a3tb%n6+tjlu1w##jwvbmcc(9f$^8u45%9^wb06lso!l8w4f7'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'user.apps.UserConfig',
     'supplements.apps.SupplementsConfig',
-    'accounts',
+    
 ]
 
 AUTH_USER_MODEL = 'user.User'

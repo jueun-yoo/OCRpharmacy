@@ -1,0 +1,54 @@
+<!-- templates/registration/signup.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>회원가입</title>
+    <!-- 부트스트랩 CSS 파일을 CDN으로 가져옴 -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>회원가입</h1>
+        <form method="post">
+            {% csrf_token %}
+            <!-- 부트스트랩을 사용하여 폼 스타일 적용 -->
+            <div class="form-group">
+                {{ form.username.label_tag }}
+                {{ form.username }}
+            </div>
+            <div class="form-group">
+                {{ form.password1.label_tag }}
+                {{ form.password1 }}
+            </div>
+            <div class="form-group">
+                {{ form.password2.label_tag }}
+                {{ form.password2 }}
+            </div>
+            <div class="form-group">
+                {{ form.name.label_tag }}
+                {{ form.name }}
+            </div>
+            <div class="form-group">
+                {{ form.age.label_tag }}
+                {{ form.age }}
+            </div>
+            <div class="form-group">
+                {{ form.gender.label_tag }}
+                {{ form.gender }}
+            </div>
+            <div class="form-group">
+                {{ form.pregnant.label_tag }}
+                {{ form.pregnant }}
+            </div>
+            <div class="form-group">
+                {{ form.breastfeeding.label_tag }}
+                {{ form.breastfeeding }}
+            </div>
+            <button type="submit" class="btn btn-primary">회원가입</button>
+        </form>
+    </div>
+
+    <!-- 부트스트랩 JS 파일을 CDN으로 가져옴 (템플릿 하단에 위치하는 것이 좋음) -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
