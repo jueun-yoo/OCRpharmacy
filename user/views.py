@@ -10,4 +10,4 @@ def signup_view(request):
             return redirect('login')  # 회원가입 후 로그인 페이지로 이동
     else:
         form = SignUpForm()
-    return render(request, 'registration/signup.html', {'form': form})
+    return render(request, 'user/signup.html', {'form': form})
