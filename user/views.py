@@ -1,13 +1,12 @@
-# user/views.py
-from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.views.generic.edit import CreateView
 from .forms import SignUpForm
 
-def signup_view(request):
-    if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')  # 회원가입 후 로그인 페이지로 이동
-    else:
-        form = SignUpForm()
-    return render(request, 'user/signup.html', {'form': form})
+class SignUpView(CreateView):
+    form_class = SignUpForm
+    template_name = 'user/signup.html'
+    success_url = reverse_lazy('login')  # 회원가입 성공 후 로그인 페이지로 이동
+
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form)
