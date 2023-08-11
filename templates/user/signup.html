@@ -1,54 +1,122 @@
-<!-- templates/registration/signup.html -->
-<!DOCTYPE html>
-<html>
-<head>
-    <title>회원가입</title>
-    <!-- 부트스트랩 CSS 파일을 CDN으로 가져옴 -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-</head>
-<body>
-    <div class="container">
-        <h1>회원가입</h1>
-        <form method="post">
-            {% csrf_token %}
-            <!-- 부트스트랩을 사용하여 폼 스타일 적용 -->
-            <div class="form-group">
-                {{ form.username.label_tag }}
-                {{ form.username }}
-            </div>
-            <div class="form-group">
-                {{ form.password1.label_tag }}
-                {{ form.password1 }}
-            </div>
-            <div class="form-group">
-                {{ form.password2.label_tag }}
-                {{ form.password2 }}
-            </div>
-            <div class="form-group">
-                {{ form.name.label_tag }}
-                {{ form.name }}
-            </div>
-            <div class="form-group">
-                {{ form.age.label_tag }}
-                {{ form.age }}
-            </div>
-            <div class="form-group">
-                {{ form.gender.label_tag }}
-                {{ form.gender }}
-            </div>
-            <div class="form-group">
-                {{ form.pregnant.label_tag }}
-                {{ form.pregnant }}
-            </div>
-            <div class="form-group">
-                {{ form.breastfeeding.label_tag }}
-                {{ form.breastfeeding }}
-            </div>
-            <button type="submit" class="btn btn-primary">회원가입</button>
-        </form>
-    </div>
+{% extends "base.html" %}
 
-    <!-- 부트스트랩 JS 파일을 CDN으로 가져옴 (템플릿 하단에 위치하는 것이 좋음) -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-</body>
-</html>
+{% block content %}
+    <h2 class="mb-3">회원가입</h2>
+    <form method="post" id="signup-form" action="{% url 'user:signup' %}">
+        {% csrf_token %}
+        <!-- General Errors -->
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-danger">{{ error }}</div>
+        {% endfor %}
+        
+        <!-- Username -->
+        <div class="mb-3">
+            <label for="{{ form.username.id_for_label }}" class="form-label">아이디</label>
+            <input type="text" class="form-control" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}">
+            {% for error in form.username.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Password1 -->
+        <div class="mb-3">
+            <label for="{{ form.password1.id_for_label }}" class="form-label">비밀번호</label>
+            <input type="password" class="form-control" id="{{ form.password1.id_for_label }}" name="{{ form.password1.name }}">
+            {% for error in form.password1.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Password2 -->
+        <div class="mb-3">
+            <label for="{{ form.password2.id_for_label }}" class="form-label">비밀번호 확인</label>
+            <input type="password" class="form-control" id="{{ form.password2.id_for_label }}" name="{{ form.password2.name }}">
+            {% for error in form.password2.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+            <label for="{{ form.email.id_for_label }}" class="form-label">이메일</label>
+            <input type="text" class="form-control" id="{{ form.email.id_for_label }}" name="{{ form.email.name }}">
+            {% for error in form.email.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Age -->
+        <div class="mb-3">
+            <label for="{{ form.age.id_for_label }}" class="form-label">나이</label>
+            <input type="number" class="form-control" id="{{ form.age.id_for_label }}" name="{{ form.age.name }}">
+            {% for error in form.age.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+        <!-- Gender -->
+        <div class="mb-3">
+            <label for="{{ form.gender.id_for_label }}" class="form-label">성별</label>
+            <select class="form-control" id="{{ form.gender.id_for_label }}" name="{{ form.gender.name }}">
+                {% for value, display in form.gender.field.choices %}
+                    <option value="{{ value }}">{{ display }}</option>
+                {% endfor %}
+            </select>
+            {% for error in form.gender.errors %}
+                <div class="alert alert-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+
+
+        <!-- Extra Fields -->
+        <div id="extra-fields" class="row">
+            <div class="col mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ form.pregnant.id_for_label }}" name="{{ form.pregnant.name }}">
+                    <label class="form-check-label" for="{{ form.pregnant.id_for_label }}">임신여부</label>
+                </div>
+                {% for error in form.pregnant.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="col mb-3">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="{{ form.breastfeeding.id_for_label }}" name="{{ form.breastfeeding.name }}">
+                    <label class="form-check-label" for="{{ form.breastfeeding.id_for_label }}">수유여부</label>
+                </div>
+                {% for error in form.breastfeeding.errors %}
+                    <div class="alert alert-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        </div>
+        <hr>
+        <button type="submit" class="btn btn-primary mb-3">가입</button>
+    </form>
+    
+    <script>
+        var genderField = document.getElementById('{{ form.gender.id_for_label }}');
+        var extraFields = document.getElementById('extra-fields');
+
+        // 페이지 로드 시 초기 상태 설정
+        if (genderField.value !== '여') {
+            extraFields.style.display = 'none';
+        }
+
+        // 성별 선택 변경 시 동작
+        genderField.addEventListener('change', function() {
+            if (this.value === '여') {
+                extraFields.style.display = 'flex';
+            } else {
+                extraFields.style.display = 'none';
+            }
+        });
+    </script>
+{% endblock %}
+
+{% block extra_head %}
+    <style>
+        #extra-fields {
+            display: none; /* 기본적으로 숨김 */
+        }
+    </style>
+{% endblock %}
