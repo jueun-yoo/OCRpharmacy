@@ -1,5 +1,14 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from .models import Nutrient, Supplement, RecommendedIntake, Synonym
+from .forms import SupplementForm, ImageUploadForm, OCRResultEditForm
+import cv2
+import uuid
+import json
+import time
+import requests
+import sqlite3
+from PIL import Image, ImageDraw
+from io import BytesIO  # io 모듈에서 BytesIO를 import 합니다.
 
 # Create your views here.
 # 영양소 상세 보기
