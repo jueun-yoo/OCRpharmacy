@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2 class="mb-3"><b>나의 영양제 목록</b></h2>
+    <div class="container">
+        <div class="row flex-row flex-nowrap" style="overflow-x: auto;">
+            <!-- !!!!!!!!!!!!!!!!!카드에 링크 안넣었음 !!!!!!!!!!!!!!!!!!!!-->
+            {% for supplement in supplements %}
+                <div class="col-4">
+                    <div class="card text-center mb-3 random-color" style="width: 10rem;">
+                        <div class="card-body">
+                            {{ supplement.name }}
+                            <small>{{ supplement.created_at|date:"Y.m.d" }}</small>
+                        </div>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <p>등록된 영양제가 없습니다.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <hr>
+    <h2 class="mb-3">나의 섭취 현황</h2>
+    <ul>
+        {% for intake in total_intake %}
+            <li>{{ intake.nutrient.name }}: {{ intake.dosage }}</li>
+        {% empty %}
+            <li>섭취 영양소가 없습니다.</li>
+        {% endfor %}
+    </ul>
+    <a href="{% url 'user:logout' %}" class="btn btn-danger">로그아웃</a>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        window.onload = function() {
+            var colorCombos = [
+                {bg: "bg-primary", text: "text-white"},
+                {bg: "bg-secondary", text: "text-white"},
+                {bg: "bg-success", text: "text-white"},
+                {bg: "bg-danger", text: "text-white"},
+                {bg: "bg-warning", text: "text-dark"},
+                {bg: "bg-info", text: "text-dark"},
+                {bg: "bg-dark", text: "text-light"},
+                {bg: "bg-light", text: "text-dark"},
+            ];
+
+            var randomColorCards = document.querySelectorAll('.random-color');
+
+            randomColorCards.forEach(function(card) {
+                var randomCombo = colorCombos[Math.floor(Math.random() * colorCombos.length)];
+                card.classList.remove('bg-warning'); // 기본 배경색 제거
+                card.classList.remove('text-dark');  // 기본 텍스트 색상 제거
+                card.classList.add(randomCombo.bg);   // 랜덤 배경색 추가
+                card.classList.add(randomCombo.text); // 랜덤 텍스트 색상 추가
+            });
+        };
+    </script>
+{% endblock %}

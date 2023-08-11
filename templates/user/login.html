@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <h2 class="mb-3">OCR약국</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <input type="text" class="form-control" id="{{ form.username.id_for_label }}" name="{{ form.username.name }}" placeholder="ID">
+        </div>
+        <div class="mb-3">
+            <input type="password" class="form-control" id="{{ form.password.id_for_label }}" name="{{ form.password.name }}" placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-primary">Login</button>
+    </form>
+    <hr>
+    <a href="{% url 'user:signup' %}" class="btn btn-secondary mt-3 ">signup</a>
+{% endblock %}
