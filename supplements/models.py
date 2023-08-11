@@ -1,8 +1,11 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from user.models import UserTotalIntake
 
 #영양소 1개 정보
 class Nutrient(models.Model): 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, primary_key=True)
     details = models.TextField()
 
     def __str__(self):
@@ -21,9 +24,11 @@ class Supplement(models.Model):
     user = models.ForeignKey('user.User', on_delete=models.CASCADE, related_name='supplement')
     name = models.CharField(max_length=200)
     nutrients = models.ManyToManyField(Nutrient, through='SupplementNutrient')
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
+  
 
 #영양제와 영양소 데이터의 관계. "복용량" 데이터 추가를 위해서!!
 #이거는 중간 모델이고, 영양제와 연결하려면 위의 모델(Supplement) 써야함
@@ -31,6 +36,8 @@ class SupplementNutrient(models.Model):
     nutrient = models.ForeignKey(Nutrient, on_delete=models.CASCADE)
     supplement = models.ForeignKey(Supplement, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
+
+
 
 #적정섭취량 모델. 조건들 + 영양소와 다대다로 엮어서 하나의 적정섭취량과 여러 영양소 연결
 class RecommendedIntake(models.Model):
@@ -48,3 +55,8 @@ class RecommendedNutrient(models.Model):
     nutrient = models.ForeignKey(Nutrient, on_delete=models.CASCADE)
     recommended_intake = models.ForeignKey(RecommendedIntake, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
+
+class Interaction(models.Model):
+    nutrient1 = models.ForeignKey(Nutrient, on_delete=models.CASCADE, related_name='interactions1')
+    nutrient2 = models.ForeignKey(Nutrient, on_delete=models.CASCADE, related_name='interactions2')
+    description = models.TextField()  # 상호작용 설명
