@@ -28,8 +28,6 @@ class IndexView(LoginRequiredMixin, ListView):
             context['total_intake'] = UserTotalIntake.objects.filter(user=self.request.user)
             return context
 
-import logging
-
 class SignUpView(CreateView):
     form_class = SignUpForm
     template_name = 'user/signup.html'
