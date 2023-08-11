@@ -5,7 +5,7 @@ from user.models import UserTotalIntake
 
 #영양소 1개 정보
 class Nutrient(models.Model): 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, primary_key=True)
     details = models.TextField()
 
     def __str__(self):
@@ -55,3 +55,8 @@ class RecommendedNutrient(models.Model):
     nutrient = models.ForeignKey(Nutrient, on_delete=models.CASCADE)
     recommended_intake = models.ForeignKey(RecommendedIntake, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
+
+class Interaction(models.Model):
+    nutrient1 = models.ForeignKey(Nutrient, on_delete=models.CASCADE, related_name='interactions1')
+    nutrient2 = models.ForeignKey(Nutrient, on_delete=models.CASCADE, related_name='interactions2')
+    description = models.TextField()  # 상호작용 설명
