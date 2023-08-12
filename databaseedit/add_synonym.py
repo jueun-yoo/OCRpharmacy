@@ -14,8 +14,8 @@ def add_supplements_synonym(name, nutrient_id):
 
 
 # 데이터 추가 예시
-add_supplements_synonym("비타민B1", "10")
-add_supplements_synonym("비타민B2", "11")
+add_supplements_synonym("비타민B1", "티아민")
+add_supplements_synonym("비타민B2", "리보플라민")
 
 # 원하는 만큼 데이터를 추가할 수 있습니다.
 

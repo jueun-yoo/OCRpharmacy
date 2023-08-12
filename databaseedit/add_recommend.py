@@ -11,7 +11,7 @@ def add_supplements_recommendedintake(gender, age_start, age_end, pregnant, brea
     sql = "INSERT INTO supplements_recommendedintake (gender, age_start, age_end, pregnant, breastfeeding) VALUES (?, ?, ?, ?, ?)"
     cursor.execute(sql, (gender, age_start, age_end, pregnant, breastfeeding))
     conn.commit()
-"""
+
 # 데이터 추가 예시
 add_supplements_recommendedintake("남", 6, 8, False, False)
 add_supplements_recommendedintake("남", 9, 11, False, False)
@@ -42,6 +42,6 @@ add_supplements_recommendedintake("여", 19, 29, False, True)
 add_supplements_recommendedintake("여", 30, 49, False, True)
 add_supplements_recommendedintake("여", 50, 64, False, True)
 # 원하는 만큼 데이터를 추가할 수 있습니다.
-"""
+
 # 연결 닫기 (중요)
 conn.close()

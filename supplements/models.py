@@ -5,7 +5,7 @@ from user.models import UserTotalIntake
 
 #영양소 1개 정보
 class Nutrient(models.Model): 
-    name = models.CharField(max_length=200)
+    name = models.CharField(max_length=200, primary_key=True)
     details = models.TextField()
 
     def __str__(self):
@@ -13,7 +13,7 @@ class Nutrient(models.Model):
 
 #영양소의 동의어 처리 - 하나의 영양소에 대해 여러개의 동의어 생성
 class Synonym(models.Model):
-    nutrient = models.ForeignKey(Nutrient, related_name='synonyms', on_delete=models.CASCADE)
+    nutrient = models.ForeignKey(Nutrient, to_field='name', related_name='synonyms', on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
 
     def __str__(self):
@@ -33,7 +33,7 @@ class Supplement(models.Model):
 #영양제와 영양소 데이터의 관계. "복용량" 데이터 추가를 위해서!!
 #이거는 중간 모델이고, 영양제와 연결하려면 위의 모델(Supplement) 써야함
 class SupplementNutrient(models.Model):
-    nutrient = models.ForeignKey(Nutrient, on_delete=models.CASCADE)
+    nutrient = models.ForeignKey(Nutrient, to_field='name', on_delete=models.CASCADE)
     supplement = models.ForeignKey(Supplement, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
 
@@ -52,6 +52,14 @@ class RecommendedIntake(models.Model):
 #적정섭취 - 영양소 연결 시 추가 필요한 복용량 데이터를 삽입하기 위한 중간 class.
 #동일하게 참조 시에는 RecommendedIntake class 참조하세요
 class RecommendedNutrient(models.Model):
-    nutrient = models.ForeignKey(Nutrient, on_delete=models.CASCADE)
+    nutrient = models.ForeignKey(Nutrient, to_field='name', on_delete=models.CASCADE)
     recommended_intake = models.ForeignKey(RecommendedIntake, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
+
+class Interaction(models.Model):
+    contents = models.TextField()
+    nutrient1 = models.ForeignKey(Nutrient, to_field='name', related_name='interactions_nutrient1', on_delete=models.CASCADE)
+    nutrient2 = models.ForeignKey(Nutrient, to_field='name', related_name='interactions_nutrient2', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.contents
