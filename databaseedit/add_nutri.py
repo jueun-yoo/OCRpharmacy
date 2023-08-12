@@ -11,7 +11,7 @@ def add_supplements_nutrient(name, details):
     sql = "INSERT INTO supplements_nutrient (name, details) VALUES (?, ?)"
     cursor.execute(sql, (name, details))
     conn.commit()
-"""
+
 # 데이터 추가 예시
 add_supplements_nutrient("열량", ".")
 add_supplements_nutrient("단백질", ".")
@@ -61,9 +61,8 @@ add_supplements_nutrient("메트포르민", ".")
 add_supplements_nutrient("클로렐라", ".")
 add_supplements_nutrient("스피루리나", ".")
 add_supplements_nutrient("비타민B1", ".")
-# 원하는 만큼 데이터를 추가할 수 있습니다.
 
-
+"""
 # 데이터 수정-detail
 def update_nutrient_details(name, new_details):
     sql = "UPDATE supplements_nutrient SET details = ? WHERE name = ?"
@@ -113,7 +112,5 @@ def update_nutrient_name(old_name, new_name):
 # 데이터 수정 예시
 update_nutrient_name("에너지", "열량")
 update_nutrient_name("비타민 B6", "비타민B6")
-
-# 원하는 만큼 데이터를 수정할 수 있습니다.
 # 연결 닫기 (중요)
 conn.close()
