@@ -1,0 +1,26 @@
+<!-- supplement_detail.html -->
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ supplement.name }} Details
+{% endblock %}
+
+{% block content %}
+    <h1>{{ supplement.name }}</h1>
+    <h2>Nutrients Intake Percentage</h2>
+    <ul>
+        {% for nutrient, dosage in supplement_nutrients.items %}
+            {% set percentage = (dosage / recommended_nutrients[nutrient]) * 100 %}
+            <li>{{ nutrient.name }}: {{ percentage|floatformat:2 }}%</li>
+        {% endfor %}
+    </ul>
+    
+    <h2>Interactions</h2>
+    <ul>
+        {% for interaction in interactions %}
+            <li>{{ interaction.nutrient1.name }} and {{ interaction.nutrient2.name }}: {{ interaction.description }}</li>
+        {% endfor %}
+    </ul>
+
+    <a href="{% url 'supplement_list' %}">Back to Supplement List</a>
+{% endblock %}
