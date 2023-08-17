@@ -107,16 +107,12 @@ def extract_info_from_image(img_inverted):
     if response.status_code == 200:
         output_json = response.json()
         print(output_json)
-        # 결과를 이미지에 그리기
-        draw = ImageDraw.Draw(original_image)
         extracted_text = []
         start_extracting = False  # '1일'이 발견된 이후부터 추출 시작
         for item in output_json['images'][0]['fields']:
             bounding_box = item['boundingPoly']
             vertices = bounding_box['vertices']
             coordinates = [(v['x'], v['y']) for v in vertices]
-            # 텍스트 영역에 박스 그리기 (녹색)
-            draw.polygon(coordinates, outline='green')
             # 텍스트 그리기
             text = item['inferText']
             if '1일' in text:
