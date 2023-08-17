@@ -6,21 +6,30 @@
 {% endblock %}
 
 {% block content %}
-    <h1>{{ supplement.name }}</h1>
-    <h2>Nutrients Intake Percentage</h2>
+    <h2>{{ supplement.name }}</h2>
+    
+    <h3 class="mb-3"><b>영양소 함량</b></h3>
+    <div class="container">
+        {% for nutrient, percentage in nutrient_percentages.items %}
+            <h6>{{ nutrient }}</h6>
+            <div style="display: flex; align-items: center;">
+                <div class="progress" style="width: 90%;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ percentage|floatformat:1|default:"0" }}%;" aria-valuenow="{{ percentage|floatformat:1|default:"0" }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p style="margin-left: 10px; margin-bottom: 10; line-height: 1;">{{ percentage|floatformat:1|default:"0" }}%</p>
+            </div>
+        {% endfor %}
+    </div>
+    <hr>
+    <h2 style="margin-top: 20px;">Interactions</h2>
     <ul>
-        {% for nutrient, dosage in supplement_nutrients.items %}
-            {% set percentage = (dosage / recommended_nutrients[nutrient]) * 100 %}
-            <li>{{ nutrient.name }}: {{ percentage|floatformat:2 }}%</li>
+        {% for interaction in interactions %}
+        <li>
+            <p><b>Content:</b> {{ interaction.content }}</p> <!-- content 필드를 추가 -->
+        </li>
         {% endfor %}
     </ul>
     
-    <h2>Interactions</h2>
-    <ul>
-        {% for interaction in interactions %}
-            <li>{{ interaction.nutrient1.name }} and {{ interaction.nutrient2.name }}: {{ interaction.description }}</li>
-        {% endfor %}
-    </ul>
 
-    <a href="{% url 'supplement_list' %}">Back to Supplement List</a>
+    <a href="{% url 'user:index' %}">메인 화면으로 돌아가기</a>
 {% endblock %}
