@@ -44,7 +44,8 @@ def supplement_detail(request, supplement_id):
         recommended_dosage = recommended_nutrients.get(nutrient)
         if recommended_dosage:
             percentage = (dosage / recommended_dosage) * 100
-            nutrient_percentages[nutrient.name] = percentage
+            nutrient_percentages[nutrient] = percentage
+
 
     interactions = Interaction.objects.filter(nutrient1__in=supplement.nutrients.all(), nutrient2__in=supplement.nutrients.all())
 
