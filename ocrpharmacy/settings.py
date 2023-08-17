@@ -131,3 +131,29 @@ STATIC_ROOT = os.path.join(BASE_DIR, '.static')
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+
+
+# settings.py
+
+import os
+
+LOGGING_DIR = os.path.join(BASE_DIR, 'logs')  # 로그 파일을 저장할 디렉토리 경로 설정
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',  # StreamHandler 사용
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],  # 사용할 핸들러 설정
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}

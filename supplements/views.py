@@ -10,6 +10,11 @@ import requests
 import sqlite3
 from PIL import Image, ImageDraw
 from io import BytesIO  # io 모듈에서 BytesIO를 import 합니다.
+import logging
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import os
+from django.conf import settings
 
 """ # Create your views here.
 # 영양소 상세 보기
@@ -64,9 +69,14 @@ def supplement_detail(request, supplement_id):
         'interactions': interactions  # 수정된 interactions 변수를 템플릿에 전달합니다.
     })
 
+@csrf_exempt
 def upload_image(request):
     if request.method == 'POST':
-        image_file = request.FILES['file']
+        # 'file' 키가 있는지 확인
+        image_file = request.FILES.get('file')
+        if not image_file:
+            return JsonResponse({'success': False, 'message': '파일이 없습니다.'})
+
         fs = FileSystemStorage()
         filename = fs.save(image_file.name, image_file)
         uploaded_file_url = fs.url(filename)
@@ -74,14 +84,16 @@ def upload_image(request):
         # 세션에 임시 이미지 URL 저장
         request.session['uploaded_file_url'] = uploaded_file_url
 
-        return redirect('supplements:process_image')
+        return JsonResponse({'success': True})
+
+    return JsonResponse({'success': False, 'message': 'POST 요청이 아닙니다.'})
 
 ###############정보추출함수 내놔..
-def extract_info_from_image(img_inverted):
+def extract_info_from_image(image_file_path):
     # 전처리 후, OCR작업
+    image_file = image_file_path
     api_url = 'https://3g69izliq5.apigw.ntruss.com/custom/v1/23692/83af5a7f71fe00ce5a40c5be9622db4c5114ba6702fdc14ddb1b4b007e5ca726/general'
     secret_key = 'UFRkQlFOSlhNUW5QS0FRamdtTnpOTWpjbmxGQ2JUek8='
-    image_file = img_inverted  # 이미지 파일 경로임 추후 수정해야됨!!!!!
     # 이미지 파일을 API에 전송하기 위한 요청 데이터 생성
     request_json = {
         'images': [
@@ -163,25 +175,34 @@ def extract_info_from_image(img_inverted):
 def process_image(request):
     uploaded_file_url = request.session.get('uploaded_file_url')
     #전처리#
-    image_file = request.FILES['image']
-    img = cv2.imread(image_file.temporary_file_path())
-    # 그레이 스케일 변환#
-    img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    # 가우시안 블러 적용 
-    img_blur = cv2.GaussianBlur(img_gray, (3, 3), 0)
-    # Adaptive 이진화 적용
-    img_adaptive = cv2.adaptiveThreshold(img_blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, blockSize=3, C=3)
-    # 노이즈 제거
-    img_denoise = cv2.fastNlMeansDenoising(img_adaptive)
-    # 색상 반전
-    img_inverted = cv2.bitwise_not(img_denoise)
-    # 이미지에서 필요한 정보 추출 (정보추출 함수 필요)
-    extracted_info = extract_info_from_image(img_inverted)
+    if uploaded_file_url:
+        file_path = os.path.join(settings.MEDIA_ROOT, uploaded_file_url.lstrip('/'))
+        img = cv2.imread(file_path)
+        # 그레이 스케일 변환#
+        img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        # 가우시안 블러 적용 
+        img_blur = cv2.GaussianBlur(img_gray, (3, 3), 0)
+        # Adaptive 이진화 적용
+        img_adaptive = cv2.adaptiveThreshold(img_blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, blockSize=3, C=3)
+        # 노이즈 제거
+        img_denoise = cv2.fastNlMeansDenoising(img_adaptive)
+        # 색상 반전
+        img_inverted = cv2.bitwise_not(img_denoise)
+        # 이미지를 파일로 저장
+        inverted_file_path = os.path.join(settings.MEDIA_ROOT, 'inverted_' + uuid.uuid4().hex + '.jpg')
+        cv2.imwrite(inverted_file_path, img_inverted)
 
-    # 추출된 정보를 세션에 저장
-    request.session['extracted_info'] = extracted_info
+        # 이미지에서 필요한 정보 추출 (정보추출 함수 필요)
+        extracted_info = extract_info_from_image(inverted_file_path)  # 파일 경로를 전달합니다.
 
-    return render(request, 'preview.html', {'info': extracted_info})
+
+        # 추출된 정보를 세션에 저장
+        request.session['extracted_info'] = extracted_info
+
+        return render(request, 'supplements/preview.html', {'info': extracted_info})
+    else:
+        # 오류 처리 (예: 이미지가 세션에 없음)
+        return JsonResponse({'success': False, 'error': 'Image not found in session'})
 
 from django.shortcuts import render, redirect
 from .models import Supplement, SupplementNutrient, Nutrient
