@@ -62,7 +62,7 @@ add_supplements_nutrient("클로렐라", ".")
 add_supplements_nutrient("스피루리나", ".")
 add_supplements_nutrient("비타민B1", ".")
 
-"""
+
 # 데이터 수정-detail
 def update_nutrient_details(name, new_details):
     sql = "UPDATE supplements_nutrient SET details = ? WHERE name = ?"
@@ -112,5 +112,6 @@ def update_nutrient_name(old_name, new_name):
 # 데이터 수정 예시
 update_nutrient_name("에너지", "열량")
 update_nutrient_name("비타민 B6", "비타민B6")
+"""
 # 연결 닫기 (중요)
 conn.close()
