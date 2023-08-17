@@ -52,6 +52,7 @@ class UserTotalIntake(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     nutrient = models.ForeignKey('supplements.Nutrient', to_field='name', on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
+    unit = models.CharField(max_length=10, default='TEMP')
 
 
     

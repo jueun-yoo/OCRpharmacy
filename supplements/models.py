@@ -36,8 +36,7 @@ class SupplementNutrient(models.Model):
     nutrient = models.ForeignKey(Nutrient, to_field='name', on_delete=models.CASCADE)
     supplement = models.ForeignKey(Supplement, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
-
-
+    unit = models.CharField(max_length=10, default='TEMP')
 
 #적정섭취량 모델. 조건들 + 영양소와 다대다로 엮어서 하나의 적정섭취량과 여러 영양소 연결
 class RecommendedIntake(models.Model):
@@ -55,6 +54,7 @@ class RecommendedNutrient(models.Model):
     nutrient = models.ForeignKey(Nutrient, to_field='name', on_delete=models.CASCADE)
     recommended_intake = models.ForeignKey(RecommendedIntake, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
+    unit = models.CharField(max_length=10, default='TEMP')
 
 class Interaction(models.Model):
     contents = models.TextField()
