@@ -47,12 +47,21 @@ def supplement_detail(request, supplement_id):
             nutrient_percentages[nutrient] = percentage
 
 
-    interactions = Interaction.objects.filter(nutrient1__in=supplement.nutrients.all(), nutrient2__in=supplement.nutrients.all())
+    # 상호작용 객체를 담을 빈 리스트를 만듭니다.
+    interactions = []
+
+    # 모든 상호작용 객체를 순회합니다.
+    all_interactions = Interaction.objects.all()
+    for interaction in all_interactions:
+        # 상호작용의 두 성분이 모두 영양제에 포함되어 있는지 확인합니다.
+        if interaction.nutrient1 in supplement.nutrients.all() and interaction.nutrient2 in supplement.nutrients.all():
+            # 두 성분이 모두 포함되어 있다면 interactions 리스트에 추가합니다.
+            interactions.append(interaction)
 
     return render(request, 'supplements/supplement_detail.html', {
         'supplement': supplement,
         'nutrient_percentages': nutrient_percentages,
-        'interactions': interactions
+        'interactions': interactions  # 수정된 interactions 변수를 템플릿에 전달합니다.
     })
 
 def upload_image(request):
