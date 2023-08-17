@@ -10,23 +10,45 @@ from django.views.generic.edit import CreateView
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import UserTotalIntake
-from supplements.models import RecommendedIntake
+from supplements.models import RecommendedIntake, RecommendedNutrient
 from django.contrib import messages
 
-class IndexView(LoginRequiredMixin, ListView):
-    template_name = 'user/index.html'
-    context_object_name = 'supplements'
+#퍼센트 계산
+def calculate_intake_percentage(user):
+    intake_percentages = {}
+    #사용자의 총섭취량 데이터 가져오기
+    user_intakes = UserTotalIntake.objects.filter(user=user)
+    #사용자의 적정섭취량 데이터 가져오기
+    recommended_intakes = {r.nutrient.name: r.dosage for r in RecommendedNutrient.objects.filter(recommended_intake=user.recommended)}
 
-    def get_queryset(self):
-        # 현재 로그인한 사용자가 등록한 영양제만 가져옴
-        return Supplement.objects.filter(user=self.request.user)
+    for intake in user_intakes:
+        nutrient_name = intake.nutrient.name
+        actual_dosage = intake.dosage
+        recommended_dosage = recommended_intakes.get(nutrient_name)
 
-    def get_context_data(self, **kwargs):
-            # 부모 클래스의 get_context_data 호출
-            context = super().get_context_data(**kwargs)
-            # 현재 로그인한 사용자의 총 섭취량 가져오기
-            context['total_intake'] = UserTotalIntake.objects.filter(user=self.request.user)
-            return context
+        if recommended_dosage:
+            percentage = (actual_dosage / recommended_dosage) * 100
+            intake_percentages[nutrient_name] = percentage
+        else:
+            intake_percentages[nutrient_name] = None
+
+    return intake_percentages
+
+
+def index_view(request):
+    # 로그인되어 있지 않은 사용자에 대해 로그인 페이지로 리디렉션
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    supplements = Supplement.objects.filter(user=request.user)
+    total_intake = UserTotalIntake.objects.filter(user=request.user)
+    intake_percentages = calculate_intake_percentage(request.user)
+
+    return render(request, 'user/index.html', {
+        'supplements': supplements,
+        'total_intake': total_intake,
+        'intake_percentages': intake_percentages
+    })
 
 class SignUpView(CreateView):
     form_class = SignUpForm
@@ -41,16 +63,7 @@ class SignUpView(CreateView):
             return super().form_valid(form)
         else:
             return self.form_invalid(form) 
-        
-    def form_invalid(self, form):
-        # 로깅을 위한 설정
-        logger = logging.getLogger(__name__)
-        logger.warning('회원가입 실패')
-        for field, errors in form.errors.items():
-            for error in errors:
-                logger.warning(f"{field}: {error}")
-
-        return super().form_invalid(form)
+    
         
 def root_redirect(request):
     User = get_user_model()

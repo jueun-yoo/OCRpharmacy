@@ -1,36 +1,65 @@
 {% extends "base.html" %}
 
 {% block content %}
+    <a href="{% url 'user:logout' %}" class="btn btn-danger">로그아웃</a>
     <h2 class="mb-3"><b>나의 영양제 목록</b></h2>
     <div class="container">
         <div class="row flex-row flex-nowrap" style="overflow-x: auto;">
-            <!-- !!!!!!!!!!!!!!!!!카드에 링크 안넣었음 !!!!!!!!!!!!!!!!!!!!-->
+            <!-- 페이지 추가 카드 -->
+            <div class="col-4">
+                <div class="card text-center mb-3 add-card" style="width: 10rem;" id="add-card">
+                    <div class="card-body">
+                        <span class="plus-sign">+</span>
+                    </div>
+                </div>
+                <input type="file" id="file-upload" style="display: none;" accept="image/*" />
+            </div>
+            <script>
+                document.getElementById('add-card').addEventListener('click', function() {
+                    document.getElementById('file-upload').click();
+                });
+            
+                document.getElementById('file-upload').addEventListener('change', function() {
+                    var fileInput = document.getElementById('file-upload');
+                    var file = fileInput.files[0];
+                    var formData = new FormData();
+                    formData.append('file', file);
+            
+                    fetch('/supplements/upload_image/', { //이 url로 연결
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            window.location.href = '/supplements/process_image'; // 전처리 페이지로 리다이렉트
+                        }
+                    });
+                });
+            </script>
+            <!--영양제 리스트-->
             {% for supplement in supplements %}
-                <div class="col-4">
+            <div class="col-4">
+                <a href="{% url 'supplement_detail' supplement.id %}">
                     <div class="card text-center mb-3 random-color" style="width: 10rem;">
                         <div class="card-body">
                             {{ supplement.name }}
                             <small>{{ supplement.created_at|date:"Y.m.d" }}</small>
-                        </div>
-                    </div>
-                </div>
-            {% empty %}
-                <div class="col-12">
-                    <p>등록된 영양제가 없습니다.</p>
-                </div>
             {% endfor %}
         </div>
     </div>
     <hr>
     <h2 class="mb-3">나의 섭취 현황</h2>
-    <ul>
-        {% for intake in total_intake %}
-            <li>{{ intake.nutrient.name }}: {{ intake.dosage }}</li>
-        {% empty %}
-            <li>섭취 영양소가 없습니다.</li>
+    <div class="container">
+        {% for nutrient, percentage in intake_percentages.items %}
+            <h5>{{ nutrient }}</h5>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" style="width: {{ percentage }}%;" aria-valuenow="{{ percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <p>{{ percentage|default:"0" }}%</p>
         {% endfor %}
-    </ul>
-    <a href="{% url 'user:logout' %}" class="btn btn-danger">로그아웃</a>
+    </div>
+
 {% endblock %}
 
 {% block extra_js %}
@@ -44,15 +73,12 @@
                 {bg: "bg-warning", text: "text-dark"},
                 {bg: "bg-info", text: "text-dark"},
                 {bg: "bg-dark", text: "text-light"},
-                {bg: "bg-light", text: "text-dark"},
             ];
 
             var randomColorCards = document.querySelectorAll('.random-color');
 
             randomColorCards.forEach(function(card) {
                 var randomCombo = colorCombos[Math.floor(Math.random() * colorCombos.length)];
-                card.classList.remove('bg-warning'); // 기본 배경색 제거
-                card.classList.remove('text-dark');  // 기본 텍스트 색상 제거
                 card.classList.add(randomCombo.bg);   // 랜덤 배경색 추가
                 card.classList.add(randomCombo.text); // 랜덤 텍스트 색상 추가
             });
