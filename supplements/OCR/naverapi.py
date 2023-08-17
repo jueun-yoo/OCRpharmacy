@@ -68,12 +68,17 @@ if response.status_code == 200:
 # SQLite 데이터베이스에 연결
     conn = sqlite3.connect('db.sqlite3')
     cursor = conn.cursor()
-    # supplements_nutrient 테이블에서 모든 영양소 정보를 가져옴
-    cursor.execute('SELECT name FROM supplements_nutrient')
+    cursor.execute('SELECT name, unit FROM supplements_nutrient')  # unit도 가져오도록 수정
     nutrient_data_db = cursor.fetchall()
+    # 연결 종료
+    conn.close()
+
+    # 영양소 정보를 저장할 리스트 초기화
+    nutrient_list = []
+
     # Extracted lines from OCR
     for line in lines:
-        for nutrient_name_db, in nutrient_data_db:  # 주목: 쉼표를 사용하여 영양소 이름을 튜플로 저장
+        for nutrient_name_db, unit in nutrient_data_db:  # unit도 가져온 데이터에서 사용
             if nutrient_name_db in line:
                 if nutrient_name_db == "열량":
                     value_start = line.find(nutrient_name_db) + len(nutrient_name_db)
@@ -82,9 +87,24 @@ if response.status_code == 200:
                     value_start = line.find(nutrient_name_db) + len(nutrient_name_db)
                     value_end = line.find("g", value_start) + 1
                 nutrient_value = line[value_start:value_end].strip()
-                add_dosage(nutrient_value, nutrient_name_db, 1)
-    # 연결 종료
-    conn.close()
+                # 추출한 값에서 단위를 제외한 숫자만 추출하여 저장
+                nutrient_value = ''.join([c for c in nutrient_value if c.isdigit() or c == '.'])
+                if nutrient_value:  # 빈 값을 방지하기 위해 확인
+                    nutrient_value = float(nutrient_value)  # 문자열을 숫자로 변환
+                else:
+                    nutrient_value = 0.0
+
+                # 영양소 정보를 딕셔너리로 구성하여 리스트에 추가
+                nutrient_info = {
+                    'name': nutrient_name_db,
+                    'dosage': nutrient_value,
+                    'unit': unit  # 데이터베이스에서 가져온 unit 사용
+                }
+                nutrient_list.append(nutrient_info)
+
+    # 딕셔너리 출력
+    print("영양소 정보 딕셔너리:", nutrient_list)
+
     
     # 이미지 저장
     output_image_file = r"C:\Microsoft VS Code\2023DNA\OCR\clova_image.jpg"
