@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h2 class="mb-3">회원가입</h2>
+    <h2 class="mb-3"><b>회원가입</b></h2>
     <form method="post" id="signup-form" action="{% url 'user:signup' %}">
         {% csrf_token %}
         <!-- General Errors -->
