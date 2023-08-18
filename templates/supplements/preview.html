@@ -1,5 +1,13 @@
 {% extends "base.html" %}
 
+{% block above_input_form %}
+    <div class="row justify-content-start" style="padding-left: 32px; margin-bottom: -20px;"> <!-- justify-content-start를 사용하여 왼쪽 정렬 -->
+        <a href="{% url 'user:index' %}">
+            <button class="btn btn-secondary" style="margin-left: 0;">메인 화면으로 돌아가기</button>
+        </a>
+    </div>
+{% endblock %}
+
 {% block content %}
 <!DOCTYPE html>
 <html lang="ko">
@@ -7,36 +15,53 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>영양제 미리보기</title>
+    <style>
+        /* 라벨의 공백 유지 */
+        label {
+            white-space: nowrap;
+        }
+
+        th:last-child,
+        td:last-child {
+            white-space: nowrap; /* 공백 유지 */
+            min-width: 1px; /* 최소 너비 설정 */
+        }
+    </style>
 </head>
 <body>
-    <h1>{{ info.name }} 미리보기</h1>
-
-    <!-- action 속성을 'save_info/' URL로 변경 -->
-    <form action="{% url 'supplements:save_info' %}" method="post">
-        {% csrf_token %}
-        <label for="supplement_name">영양제 이름:</label>
-        <input type="text" id="supplement_name" name="supplement_name" value="{{ info.name }}" required> <!-- 이 부분을 수정 -->
-        <table border="1">
-            <thead>
-                <tr>
-                    <th>영양소</th>
-                    <th>복용량</th>
-                    <th>단위</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for nutrient in info.nutrients %}
+    <div class="container">
+        <h2><b>영양제 등록</b></h2>
+        <hr>
+        <form action="{% url 'supplements:save_info' %}" method="post">
+            {% csrf_token %}
+            <div class="form-group row">
+                <label for="supplement_name" class="col-form-label col-sm-2 mr-2">영양제 이름:</label> <!-- 여기에 mr-2 추가 -->
+                <div class="col-sm-9">
+                    <input type="text" id="supplement_name" name="supplement_name" value="{{ info.name }}" class="form-control" required placeholder="영양제 이름을 입력하세요">
+                </div>
+                
+            </div>
+            <table class="table table-bordered text-center">
+                <thead>
                     <tr>
-                        <td><input type="text" name="nutrients[{{ forloop.counter0 }}][name]" value="{{ nutrient.name }}" /></td>
-                        <td><input type="text" name="nutrients[{{ forloop.counter0 }}][dosage]" value="{{ nutrient.dosage }}" /></td>
-                        <td>{{ nutrient.unit }}</td>
+                        <th>영양소</th>
+                        <th>복용량</th>
+                        <th>단위</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <button type="submit">저장</button>
-    </form>
+                </thead>
+                <tbody>
+                    {% for nutrient in info.nutrients %}
+                        <tr>
+                            <td><input type="text" name="nutrients[{{ forloop.counter0 }}][name]" value="{{ nutrient.name }}" class="form-control" /></td>
+                            <td><input type="text" name="nutrients[{{ forloop.counter0 }}][dosage]" value="{{ nutrient.dosage }}" class="form-control" /></td>
+                            <td>{{ nutrient.unit }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <button type="submit" class="btn btn-primary">저장</button>
+        </form>
+    </div>
 </body>
 </html>
 {% endblock %}
