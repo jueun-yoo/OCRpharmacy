@@ -12,8 +12,11 @@
 <body>
     <h1>{{ info.name }} 미리보기</h1>
 
-<form action="{% url 'supplements:save_info' %}" method="post">
+    <!-- action 속성을 'save_info/' URL로 변경 -->
+    <form action="{% url 'supplements:save_info' %}" method="post">
         {% csrf_token %}
+        <label for="supplement_name">영양제 이름:</label>
+        <input type="text" id="supplement_name" name="supplement_name" value="{{ info.name }}" required> <!-- 이 부분을 수정 -->
         <table border="1">
             <thead>
                 <tr>
@@ -27,7 +30,7 @@
                     <tr>
                         <td><input type="text" name="nutrients[{{ forloop.counter0 }}][name]" value="{{ nutrient.name }}" /></td>
                         <td><input type="text" name="nutrients[{{ forloop.counter0 }}][dosage]" value="{{ nutrient.dosage }}" /></td>
-                        <td><input type="text" name="nutrients[{{ forloop.counter0 }}][unit]" value="{{ nutrient.unit }}" /></td>
+                        <td>{{ nutrient.unit }}</td>
                     </tr>
                 {% endfor %}
             </tbody>

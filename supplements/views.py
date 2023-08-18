@@ -15,6 +15,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import os
 from django.conf import settings
+from django.http import HttpResponseRedirect
+from django.urls import reverse
 
 """ # Create your views here.
 # 영양소 상세 보기
@@ -192,32 +194,41 @@ def process_image(request):
         inverted_file_path = os.path.join(settings.MEDIA_ROOT, 'inverted_' + uuid.uuid4().hex + '.jpg')
         cv2.imwrite(inverted_file_path, img_inverted)
 
+        # POST 데이터에서 영양제 이름을 가져옵니다.
+        supplement_name = request.POST.get('supplement_name')
+        
+
         # 이미지에서 필요한 정보 추출 (정보추출 함수 필요)
         extracted_info = extract_info_from_image(inverted_file_path)  # 파일 경로를 전달합니다.
 
+        info = {
+                'name': supplement_name,
+                'nutrients': extracted_info
+                }
 
         # 추출된 정보를 세션에 저장
-        request.session['extracted_info'] = extracted_info
+        request.session['info'] = info
+        request.session['supplement_name'] = supplement_name
 
-        return render(request, 'supplements/preview.html', {'info': extracted_info})
+        return render(request, 'supplements/preview.html', {'info': info})  # save_info URL로 리다이렉트
     else:
         # 오류 처리 (예: 이미지가 세션에 없음)
         return JsonResponse({'success': False, 'error': 'Image not found in session'})
 
 from django.shortcuts import render, redirect
 from .models import Supplement, SupplementNutrient, Nutrient
+from django.contrib import messages
 
 def save_info(request):
     if request.method == 'POST':
-        # 세션에서 추출된 정보를 가져옵니다.
-        extracted_info = request.session.get('extracted_info')
+        supplement_name = request.POST.get('supplement_name')        
 
-        # Supplement 객체를 생성합니다.
-        supplement = Supplement(name=extracted_info['name'], user=request.user)
+        # 기존 보충제를 가져옵니다.
+        supplement = Supplement(name=supplement_name, user=request.user)
         supplement.save()
 
-        # 각 영양소 정보를 저장합니다.
-        for nutrient_info in extracted_info['nutrients']:
+        nutrients_info = request.POST.getlist('nutrients')  # nutrients 정보를 가져옵니다.
+        for nutrient_info in nutrients_info:
             nutrient_name = nutrient_info['name']
             dosage = nutrient_info['dosage']
             unit = nutrient_info['unit']
@@ -229,6 +240,6 @@ def save_info(request):
             supplement_nutrient = SupplementNutrient(nutrient=nutrient, supplement=supplement, dosage=dosage, unit=unit)
             supplement_nutrient.save()
 
-        return redirect('success')
+        return redirect('user:index')
 
     return redirect('error')
