@@ -35,4 +35,10 @@
     {% else %}
     <p>상호작용이 없습니다.</p>
     {% endif %}
+    <div class="row justify-content-end" style="margin-bottom: 20px;"> <!-- 오른쪽 정렬 -->
+        <form action="{% url 'supplements:delete_supplement' supplement.id %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">영양제 삭제</button>
+        </form>
+    </div>
 {% endblock %}

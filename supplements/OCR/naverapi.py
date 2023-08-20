@@ -13,8 +13,8 @@ def add_dosage(dosage, nutrient_id, supplement_id):
 
 api_url = 'https://3g69izliq5.apigw.ntruss.com/custom/v1/23692/83af5a7f71fe00ce5a40c5be9622db4c5114ba6702fdc14ddb1b4b007e5ca726/general'
 secret_key = 'UFRkQlFOSlhNUW5QS0FRamdtTnpOTWpjbmxGQ2JUek8='
-image_file =  r"C:\Microsoft VS Code\2023DNA\OCR\result1.jpg" # 이미지 파일 경로임 추후 수정해야됨!!!!!
-original_image = Image.open(r"C:\Microsoft VS Code\2023DNA\OCR\1.jpg")
+image_file =  r"C:\Microsoft VS Code\2023DNA\OCR\55.jpg" # 이미지 파일 경로임 추후 수정해야됨!!!!!
+original_image = Image.open(r"C:\Microsoft VS Code\2023DNA\OCR\55.jpg")
 # 이미지 파일을 API에 전송하기 위한 요청 데이터 생성
 request_json = {
     'images': [
@@ -75,11 +75,12 @@ if response.status_code == 200:
 
     # 영양소 정보를 저장할 리스트 초기화
     nutrient_list = []
+    processed_nutrients = set() # Processed nutrients
 
     # Extracted lines from OCR
     for line in lines:
         for nutrient_name_db, unit in nutrient_data_db:  # unit도 가져온 데이터에서 사용
-            if nutrient_name_db in line:
+            if nutrient_name_db in line and nutrient_name_db not in processed_nutrients:
                 if nutrient_name_db == "열량":
                     value_start = line.find(nutrient_name_db) + len(nutrient_name_db)
                     value_end = line.find("kcal", value_start) + len("kcal") + 1
@@ -87,12 +88,15 @@ if response.status_code == 200:
                     value_start = line.find(nutrient_name_db) + len(nutrient_name_db)
                     value_end = line.find("g", value_start) + 1
                 nutrient_value = line[value_start:value_end].strip()
+                if not any(char.isdigit() for char in nutrient_value):
+                    continue
                 # 추출한 값에서 단위를 제외한 숫자만 추출하여 저장
                 nutrient_value = ''.join([c for c in nutrient_value if c.isdigit() or c == '.'])
                 if nutrient_value:  # 빈 값을 방지하기 위해 확인
                     nutrient_value = float(nutrient_value)  # 문자열을 숫자로 변환
                 else:
                     nutrient_value = 0.0
+                processed_nutrients.add(nutrient_name_db)
 
                 # 영양소 정보를 딕셔너리로 구성하여 리스트에 추가
                 nutrient_info = {
