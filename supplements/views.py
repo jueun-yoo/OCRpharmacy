@@ -10,13 +10,15 @@ import requests
 import sqlite3
 from PIL import Image, ImageDraw
 from io import BytesIO  # io 모듈에서 BytesIO를 import 합니다.
-import logging
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import os
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import reverse
+from django.core.files.base import ContentFile
+import base64
+import numpy as np
 
 """ # Create your views here.
 # 영양소 상세 보기
@@ -57,13 +59,18 @@ def supplement_detail(request, supplement_id):
     # 상호작용 객체를 담을 빈 리스트를 만듭니다.
     interactions = []
 
+    # 영양제의 SupplementNutrient 객체들 중에서 용량이 0이 아닌 것만 선택합니다.
+    supplement_nutrients_with_dosage = [sup_nut for sup_nut in SupplementNutrient.objects.filter(supplement=supplement) if sup_nut.dosage > 0]
+
     # 모든 상호작용 객체를 순회합니다.
     all_interactions = Interaction.objects.all()
     for interaction in all_interactions:
-        # 상호작용의 두 성분이 모두 영양제에 포함되어 있는지 확인합니다.
-        if interaction.nutrient1 in supplement.nutrients.all() and interaction.nutrient2 in supplement.nutrients.all():
-            # 두 성분이 모두 포함되어 있다면 interactions 리스트에 추가합니다.
+        # 상호작용의 두 성분이 모두 영양제에 포함되어 있고, 용량이 0이 아닌지 확인합니다.
+        if interaction.nutrient1 in [sup_nut.nutrient for sup_nut in supplement_nutrients_with_dosage] and interaction.nutrient2 in [sup_nut.nutrient for sup_nut in supplement_nutrients_with_dosage]:
+            # 두 성분이 모두 포함되어 있고 용량이 0이 아니라면 interactions 리스트에 추가합니다.
             interactions.append(interaction)
+
+
 
     return render(request, 'supplements/supplement_detail.html', {
         'supplement': supplement,
@@ -71,29 +78,27 @@ def supplement_detail(request, supplement_id):
         'interactions': interactions  # 수정된 interactions 변수를 템플릿에 전달합니다.
     })
 
-@csrf_exempt
 def upload_image(request):
     if request.method == 'POST':
         # 'file' 키가 있는지 확인
         image_file = request.FILES.get('file')
         if not image_file:
             return JsonResponse({'success': False, 'message': '파일이 없습니다.'})
-
-        fs = FileSystemStorage()
-        filename = fs.save(image_file.name, image_file)
-        uploaded_file_url = fs.url(filename)
-
-        # 세션에 임시 이미지 URL 저장
-        request.session['uploaded_file_url'] = uploaded_file_url
+        
+        # 파일을 읽어 base64로 인코딩, 세션에 저장
+        image_data = base64.b64encode(image_file.read())
+        request.session['uploaded_image_base64'] = image_data.decode('utf-8')
 
         return JsonResponse({'success': True})
 
     return JsonResponse({'success': False, 'message': 'POST 요청이 아닙니다.'})
 
 ###############정보추출함수 내놔..
-def extract_info_from_image(image_file_path):
-    # 전처리 후, OCR작업
-    image_file = image_file_path
+def extract_info_from_image(image_np):
+    _, image_file = cv2.imencode('.jpg', image_np)
+    image_file_buffer = BytesIO(image_file)
+
+
     api_url = 'https://3g69izliq5.apigw.ntruss.com/custom/v1/23692/83af5a7f71fe00ce5a40c5be9622db4c5114ba6702fdc14ddb1b4b007e5ca726/general'
     secret_key = 'UFRkQlFOSlhNUW5QS0FRamdtTnpOTWpjbmxGQ2JUek8='
     # 이미지 파일을 API에 전송하기 위한 요청 데이터 생성
@@ -110,7 +115,7 @@ def extract_info_from_image(image_file_path):
     }
     payload = {'message': json.dumps(request_json).encode('UTF-8')}
     files = [
-        ('file', open(image_file, 'rb'))
+        ('file', ('demo.jpg', image_file_buffer, 'image/jpeg'))  # 파일 대신 바이트 스트림 객체를 전달
     ]
     headers = {
         'X-OCR-SECRET': secret_key
@@ -175,12 +180,18 @@ def extract_info_from_image(image_file_path):
     return extracted_info
 
 def process_image(request):
-    uploaded_file_url = request.session.get('uploaded_file_url')
-    #전처리#
-    if uploaded_file_url:
-        file_path = os.path.join(settings.MEDIA_ROOT, uploaded_file_url.lstrip('/'))
-        img = cv2.imread(file_path)
-        # 그레이 스케일 변환#
+    # 세션에서 이미지 데이터 가져오기
+    uploaded_image_base64 = request.session.get('uploaded_image_base64')
+    if uploaded_image_base64:
+        # base64 데이터를 이미지로 변환
+        image_data = base64.b64decode(uploaded_image_base64)
+        image_data_buffer = BytesIO(image_data)
+        image_data_np = np.frombuffer(image_data_buffer.read(), np.uint8)
+        img = cv2.imdecode(image_data_np, cv2.IMREAD_COLOR)
+        
+        #이미지처리 코드
+
+        # 그레이 스케일 변환
         img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
         # 가우시안 블러 적용 
         img_blur = cv2.GaussianBlur(img_gray, (3, 3), 0)
@@ -190,16 +201,14 @@ def process_image(request):
         img_denoise = cv2.fastNlMeansDenoising(img_adaptive)
         # 색상 반전
         img_inverted = cv2.bitwise_not(img_denoise)
-        # 이미지를 파일로 저장
-        inverted_file_path = os.path.join(settings.MEDIA_ROOT, 'inverted_' + uuid.uuid4().hex + '.jpg')
-        cv2.imwrite(inverted_file_path, img_inverted)
-
+        
         # POST 데이터에서 영양제 이름을 가져옵니다.
-        supplement_name = request.POST.get('supplement_name')
+        supplement_name = request.POST.get('supplement_name', '')
         
 
-        # 이미지에서 필요한 정보 추출 (정보추출 함수 필요)
-        extracted_info = extract_info_from_image(inverted_file_path)  # 파일 경로를 전달합니다.
+        # 이미지를 파일로 저장하지 않고, invert 처리한 이미지를 직접 추출 함수에 전달합니다.
+        extracted_info = extract_info_from_image(img_inverted)
+
 
         info = {
                 'name': supplement_name,
@@ -209,6 +218,9 @@ def process_image(request):
         # 추출된 정보를 세션에 저장
         request.session['info'] = info
         request.session['supplement_name'] = supplement_name
+
+        # 세션에서 이미지 데이터 삭제
+        del request.session['uploaded_image_base64']
 
         return render(request, 'supplements/preview.html', {'info': info})  # save_info URL로 리다이렉트
     else:
@@ -227,14 +239,25 @@ def save_info(request):
         supplement = Supplement(name=supplement_name, user=request.user)
         supplement.save()
 
-        nutrients_info = request.POST.getlist('nutrients')  # nutrients 정보를 가져옵니다.
-        for nutrient_info in nutrients_info:
-            nutrient_name = nutrient_info['name']
-            dosage = nutrient_info['dosage']
-            unit = nutrient_info['unit']
+        # nutrients 정보를 동적으로 처리합니다.
+        nutrients_info = []
+        i = 0
+        while True:
+            nutrient_name = request.POST.get(f'nutrients[{i}][name]')
+            if nutrient_name is None:
+                break # 더 이상의 nutrients가 없을 경우 반복 종료
+            dosage = float(request.POST.get(f'nutrients[{i}][dosage]')) # 문자열을 부동소수점 숫자로 변환
+            unit = request.POST.get(f'nutrients[{i}][unit]', 'mg') # unit 정보가 없다면 기본값으로 'mg'를 사용
+            nutrients_info.append((nutrient_name, dosage, unit))
+            i += 1
 
-            # 영양소를 찾거나 새로 생성합니다.
-            nutrient, created = Nutrient.objects.get_or_create(name=nutrient_name)
+        for nutrient_name, dosage, unit in nutrients_info:
+            try:
+                # 영양소를 찾습니다.
+                nutrient = Nutrient.objects.get(name=nutrient_name)
+            except Nutrient.DoesNotExist:
+                # 해당 이름의 영양소가 없을 경우, 다음 영양소로 넘어갑니다.
+                continue
 
             # SupplementNutrient 객체를 생성하고 연결합니다.
             supplement_nutrient = SupplementNutrient(nutrient=nutrient, supplement=supplement, dosage=dosage, unit=unit)

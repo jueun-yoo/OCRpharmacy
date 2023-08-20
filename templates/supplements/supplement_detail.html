@@ -1,35 +1,38 @@
 <!-- supplement_detail.html -->
 {% extends 'base.html' %}
 
-{% block title %}
-    {{ supplement.name }} Details
+{% block above_input_form %}
+    <div class="row justify-content-start" style="padding-left: 32px; margin-bottom: -20px;"> <!-- justify-content-start를 사용하여 왼쪽 정렬 -->
+        <a href="{% url 'user:index' %}">
+            <button class="btn btn-secondary" style="margin-left: 0;">메인 화면으로 돌아가기</button>
+        </a>
+    </div>
 {% endblock %}
 
 {% block content %}
-    <h2>{{ supplement.name }}</h2>
-    
-    <h3 class="mb-3"><b>영양소 함량</b></h3>
+    <h2 class="mb-4"><b>"{{ supplement.name }}" 영양제 상세정보</b></h2>
     <div class="container">
         {% for nutrient, percentage in nutrient_percentages.items %}
             <h6>{{ nutrient }}</h6>
-            <div style="display: flex; align-items: center;">
+            <div class="mb-3" style="display: flex; align-items: center;">
                 <div class="progress" style="width: 90%;">
                     <div class="progress-bar" role="progressbar" style="width: {{ percentage|floatformat:1|default:"0" }}%;" aria-valuenow="{{ percentage|floatformat:1|default:"0" }}" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
-                <p style="margin-left: 10px; margin-bottom: 10; line-height: 1;">{{ percentage|floatformat:1|default:"0" }}%</p>
+                <p style="margin-left: 10px; margin-bottom: 10px; line-height: 1;">{{ percentage|floatformat:1|default:"0" }}%</p>
             </div>
         {% endfor %}
     </div>
     <hr>
-    <h2 style="margin-top: 20px;">Interactions</h2>
+    <h2 class="mb-4 mt-4"><b>상호작용</b></h2>
+    {% if interactions %}
     <ul>
         {% for interaction in interactions %}
         <li>
-            <p><b>Content:</b> {{ interaction.content }}</p> <!-- content 필드를 추가 -->
+            <p>{{ interaction.contents }}</p>
         </li>
         {% endfor %}
     </ul>
-    
-
-    <a href="{% url 'user:index' %}">메인 화면으로 돌아가기</a>
+    {% else %}
+    <p>상호작용이 없습니다.</p>
+    {% endif %}
 {% endblock %}

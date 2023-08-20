@@ -9,6 +9,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>OCR약국</title>
 
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR&display=swap" rel="stylesheet">
+
   <!-- Bootstrap CSS -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
     integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
@@ -43,6 +48,7 @@
 </head>
 <body>
     <div class="container" style="padding-top: 20px; padding-bottom: 20px;">
+        {% block above_input_form %}{% endblock %}
         <div class="input-form-backgroud row">
             <div class="input-form col-md-12 mx-auto">
             {% block content %}{% endblock %}
