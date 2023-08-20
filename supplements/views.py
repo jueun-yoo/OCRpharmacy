@@ -1,6 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.files.storage import FileSystemStorage
-from .models import Supplement, Nutrient
+from .models import Supplement, Nutrient, UserTotalIntake
 from .models import Supplement, SupplementNutrient, RecommendedNutrient, Interaction
 import cv2
 import uuid
@@ -78,6 +78,11 @@ def supplement_detail(request, supplement_id):
         'interactions': interactions  # 수정된 interactions 변수를 템플릿에 전달합니다.
     })
 
+def delete_supplement(request, supplement_id):
+    supplement = get_object_or_404(Supplement, id=supplement_id)
+    supplement.delete()
+    return redirect('user:index')
+
 def upload_image(request):
     if request.method == 'POST':
         # 'file' 키가 있는지 확인
@@ -153,10 +158,11 @@ def extract_info_from_image(image_np):
         conn.close()
         # 영양소 정보를 저장할 리스트 초기화
         extracted_info = []
+        processed_nutrients = set()
         # Extracted lines from OCR
         for line in lines:
             for nutrient_name_db, unit in nutrient_data_db:  # unit도 가져온 데이터에서 사용
-                if nutrient_name_db in line:
+                if nutrient_name_db in line and nutrient_name_db not in processed_nutrients:
                     if nutrient_name_db == "열량":
                         value_start = line.find(nutrient_name_db) + len(nutrient_name_db)
                         value_end = line.find("kcal", value_start) + len("kcal") + 1
@@ -164,12 +170,15 @@ def extract_info_from_image(image_np):
                         value_start = line.find(nutrient_name_db) + len(nutrient_name_db)
                         value_end = line.find("g", value_start) + 1
                     nutrient_value = line[value_start:value_end].strip()
+                    if not any(char.isdigit() for char in nutrient_value):
+                        continue
                     # 추출한 값에서 단위를 제외한 숫자만 추출하여 저장
                     nutrient_value = ''.join([c for c in nutrient_value if c.isdigit() or c == '.'])
                     if nutrient_value:  # 빈 값을 방지하기 위해 확인
                         nutrient_value = float(nutrient_value)  # 문자열을 숫자로 변환
                     else:
                         nutrient_value = 0.0
+                    processed_nutrients.add(nutrient_name_db)
                     # 영양소 정보를 딕셔너리로 구성하여 리스트에 추가
                     nutrient_info = {
                         'name': nutrient_name_db,
@@ -247,14 +256,14 @@ def save_info(request):
             if nutrient_name is None:
                 break # 더 이상의 nutrients가 없을 경우 반복 종료
             dosage = float(request.POST.get(f'nutrients[{i}][dosage]')) # 문자열을 부동소수점 숫자로 변환
-            unit = request.POST.get(f'nutrients[{i}][unit]', 'mg') # unit 정보가 없다면 기본값으로 'mg'를 사용
-            nutrients_info.append((nutrient_name, dosage, unit))
+            nutrients_info.append((nutrient_name, dosage))
             i += 1
 
-        for nutrient_name, dosage, unit in nutrients_info:
+        for nutrient_name, dosage in nutrients_info:
             try:
                 # 영양소를 찾습니다.
                 nutrient = Nutrient.objects.get(name=nutrient_name)
+                unit = nutrient.unit
             except Nutrient.DoesNotExist:
                 # 해당 이름의 영양소가 없을 경우, 다음 영양소로 넘어갑니다.
                 continue

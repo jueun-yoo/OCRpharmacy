@@ -1,4 +1,5 @@
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
+from django.db.models import Sum
 from django.dispatch import receiver
 from .models import Supplement, SupplementNutrient, Nutrient
 from user.models import UserTotalIntake
@@ -19,6 +20,20 @@ def update_user_total_intake(sender, instance, **kwargs):
 
     # 총 섭취량을 업데이트합니다.
     total_intake.dosage += dosage
+    total_intake.save()
+
+@receiver(post_delete, sender=SupplementNutrient)
+def delete_user_total_intake(sender, instance, **kwargs):
+    nutrient = instance.nutrient
+    dosage = instance.dosage
+    user = instance.supplement.user
+
+    total_intake = UserTotalIntake.objects.get(
+        user=user, nutrient=nutrient
+    )
+
+    # 총 섭취량을 업데이트합니다.
+    total_intake.dosage -= dosage
     total_intake.save()
 
 @receiver(post_save, sender=Supplement)

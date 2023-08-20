@@ -46,8 +46,7 @@ class User(AbstractBaseUser):
 
     def __str__(self):
         return self.username
-
-
+    
 class UserTotalIntake(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     nutrient = models.ForeignKey('supplements.Nutrient', to_field='name', on_delete=models.CASCADE)
