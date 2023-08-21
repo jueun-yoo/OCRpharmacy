@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.core.files.storage import FileSystemStorage
 from .models import Supplement, Nutrient, UserTotalIntake
-from .models import Supplement, SupplementNutrient, RecommendedNutrient, Interaction
+from .models import Supplement, SupplementNutrient, RecommendedNutrient, Interaction, Synonym
 import cv2
 import uuid
 import json
@@ -47,14 +47,19 @@ def supplement_detail(request, supplement_id):
     supplement_nutrients = {sn.nutrient.name: sn.dosage for sn in SupplementNutrient.objects.filter(supplement=supplement)}
     recommended_nutrients = {rn.nutrient.name: rn.dosage for rn in RecommendedNutrient.objects.filter(recommended_intake=user.recommended)}
 
-
-    nutrient_percentages = {}
+    over_nutrients = {}
+    under_nutrients = {}
+    remaining_nutrients = {}
     for nutrient, dosage in supplement_nutrients.items():
         recommended_dosage = recommended_nutrients.get(nutrient)
         if recommended_dosage:
             percentage = (dosage / recommended_dosage) * 100
-            nutrient_percentages[nutrient] = percentage
-
+            if percentage > 100:
+                over_nutrients[nutrient] = percentage
+            elif percentage < 50:
+                under_nutrients[nutrient] = percentage
+            else:
+                remaining_nutrients[nutrient] = percentage  
 
     # 상호작용 객체를 담을 빈 리스트를 만듭니다.
     interactions = []
@@ -70,13 +75,13 @@ def supplement_detail(request, supplement_id):
             # 두 성분이 모두 포함되어 있고 용량이 0이 아니라면 interactions 리스트에 추가합니다.
             interactions.append(interaction)
 
-
-
     return render(request, 'supplements/supplement_detail.html', {
-        'supplement': supplement,
-        'nutrient_percentages': nutrient_percentages,
-        'interactions': interactions  # 수정된 interactions 변수를 템플릿에 전달합니다.
-    })
+    'supplement': supplement,
+    'over_nutrients': over_nutrients,
+    'under_nutrients': under_nutrients,
+    'remaining_nutrients': remaining_nutrients,
+    'interactions': interactions
+})
 
 def delete_supplement(request, supplement_id):
     supplement = get_object_or_404(Supplement, id=supplement_id)
@@ -271,6 +276,25 @@ def save_info(request):
             # SupplementNutrient 객체를 생성하고 연결합니다.
             supplement_nutrient = SupplementNutrient(nutrient=nutrient, supplement=supplement, dosage=dosage, unit=unit)
             supplement_nutrient.save()
+
+            for nutrient_name, dosage in nutrients_info:
+                try:
+                    # 영양소를 찾습니다.
+                    nutrient = Nutrient.objects.get(name=nutrient_name)
+                    unit = nutrient.unit
+                except Nutrient.DoesNotExist:
+                    # 해당 이름의 영양소가 없을 경우, 동의어에서 찾습니다.
+                    try:
+                        synonym = Synonym.objects.get(name=nutrient_name)
+                        nutrient = synonym.nutrient
+                        unit = nutrient.unit
+                    except Synonym.DoesNotExist:
+                        # 동의어에도 없을 경우, 다음 영양소로 넘어갑니다.
+                        continue
+
+                # SupplementNutrient 객체를 생성하고 연결합니다.
+                supplement_nutrient = SupplementNutrient(nutrient=nutrient, supplement=supplement, dosage=dosage, unit=unit)
+                supplement_nutrient.save()
 
         return redirect('user:index')
 

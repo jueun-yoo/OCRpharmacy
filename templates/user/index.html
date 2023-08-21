@@ -1,11 +1,13 @@
 {% extends "base.html" %}
 
 {% block above_input_form %}
-    <div class="row justify-content-start" style="padding-left: 32px; margin-bottom: -20px;"> <!-- justify-content-start를 사용하여 왼쪽 정렬 -->
+<div class="row justify-content-center">
+    <div class="col-md-12" style="max-width: 680px; padding-left: 32px; padding-right: 32px;  margin-bottom: -10px">
         <a href="{% url 'user:logout' %}"> <!-- 로그아웃 URL로 이동 -->
-            <button class="btn btn-danger" style="margin-left: 0;">로그아웃</button> <!-- 버튼 스타일을 'danger'로 설정 -->
+            <button class="btn btn-danger" style="margin-left: 0;">로그아웃</button>
         </a>
     </div>
+</div>
 {% endblock %}
 
 {% block content %}
