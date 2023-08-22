@@ -56,6 +56,7 @@ class RecommendedNutrient(models.Model):
     recommended_intake = models.ForeignKey(RecommendedIntake, on_delete=models.CASCADE)
     dosage = models.FloatField(default=0.0)
     unit = models.CharField(max_length=10, default='TEMP')
+    limit = models.FloatField(null=True, blank=True)
 
 class Interaction(models.Model):
     contents = models.TextField()
