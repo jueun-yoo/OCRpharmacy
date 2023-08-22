@@ -46,20 +46,22 @@ def supplement_detail(request, supplement_id):
 
     supplement_nutrients = {sn.nutrient.name: sn.dosage for sn in SupplementNutrient.objects.filter(supplement=supplement)}
     recommended_nutrients = {rn.nutrient.name: rn.dosage for rn in RecommendedNutrient.objects.filter(recommended_intake=user.recommended)}
+    limit_nutrients = {qn.nutrient.name: qn.limit for qn in RecommendedNutrient.objects.filter(recommended_intake=user.recommended)}
 
     over_nutrients = {}
     under_nutrients = {}
     remaining_nutrients = {}
     for nutrient, dosage in supplement_nutrients.items():
         recommended_dosage = recommended_nutrients.get(nutrient)
+        limit_dosage = limit_nutrients.get(nutrient)
         if recommended_dosage:
             percentage = (dosage / recommended_dosage) * 100
-            if percentage > 100:
+            if limit_dosage and limit_dosage < dosage:
                 over_nutrients[nutrient] = percentage
             elif percentage < 50:
                 under_nutrients[nutrient] = percentage
             else:
-                remaining_nutrients[nutrient] = percentage  
+                remaining_nutrients[nutrient] = percentage 
 
     # 상호작용 객체를 담을 빈 리스트를 만듭니다.
     interactions = []
