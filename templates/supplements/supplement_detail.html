@@ -1,18 +1,53 @@
-<!-- supplement_detail.html -->
 {% extends 'base.html' %}
 
 {% block above_input_form %}
-    <div class="row justify-content-start" style="padding-left: 32px; margin-bottom: -20px;"> <!-- justify-content-start를 사용하여 왼쪽 정렬 -->
-        <a href="{% url 'user:index' %}">
-            <button class="btn btn-secondary" style="margin-left: 0;">메인 화면으로 돌아가기</button>
-        </a>
+    <div class="row justify-content-center">
+        <div class="col-md-12" style="max-width: 680px; padding-left: 32px; padding-right: 32px;  margin-bottom: -10px">
+            <a href="{% url 'user:index' %}">
+                <button class="btn btn-secondary" style="margin-left: 0;">메인 화면으로 돌아가기</button>
+            </a>
+        </div>
     </div>
 {% endblock %}
+
 
 {% block content %}
     <h2 class="mb-4"><b>"{{ supplement.name }}" 영양제 상세정보</b></h2>
     <div class="container">
-        {% for nutrient, percentage in nutrient_percentages.items %}
+        <!-- 100% 초과 영양소 -->
+        {% if over_nutrients %}
+        <div class="alert alert-danger">
+            <h4 class="mb-3"><b>과다섭취 영양소</b></h4>
+            {% for nutrient, percentage in over_nutrients.items %}
+                <h6>{{ nutrient }}</h6>
+                <div class="mb-3" style="display: flex; align-items: center;">
+                    <div class="progress" style="width: 90%;">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: {{ percentage|floatformat:1|default:"0" }}%;" aria-valuenow="{{ percentage|floatformat:1|default:"0" }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p style="margin-left: 10px; margin-bottom: 10px; line-height: 1;">{{ percentage|floatformat:1|default:"0" }}%</p>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- 50% 미만 영양소 -->
+        {% if under_nutrients %}
+        <div class="alert alert-warning">
+            <h4 class="mb-3"><b>부족섭취 영양소</b></h4>
+            {% for nutrient, percentage in under_nutrients.items %}
+                <h6>{{ nutrient }}</h6>
+                <div class="mb-3" style="display: flex; align-items: center;">
+                    <div class="progress" style="width: 90%;">
+                        <div class="progress-bar bg-warning" role="progressbar" style="width: {{ percentage|floatformat:1|default:"0" }}%;" aria-valuenow="{{ percentage|floatformat:1|default:"0" }}" aria-valuemin="0" aria-valuemax="100"></div>
+                    </div>
+                    <p style="margin-left: 10px; margin-bottom: 10px; line-height: 1;">{{ percentage|floatformat:1|default:"0" }}%</p>
+                </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- 나머지 영양소 -->
+        {% for nutrient, percentage in remaining_nutrients.items %}
             <h6>{{ nutrient }}</h6>
             <div class="mb-3" style="display: flex; align-items: center;">
                 <div class="progress" style="width: 90%;">
@@ -22,6 +57,7 @@
             </div>
         {% endfor %}
     </div>
+
     <hr>
     <h2 class="mb-4 mt-4"><b>상호작용</b></h2>
     {% if interactions %}
@@ -41,4 +77,5 @@
             <button type="submit" class="btn btn-danger">영양제 삭제</button>
         </form>
     </div>
+
 {% endblock %}
