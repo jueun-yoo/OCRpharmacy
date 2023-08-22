@@ -1,12 +1,15 @@
 {% extends "base.html" %}
 
 {% block above_input_form %}
-    <div class="row justify-content-start" style="padding-left: 32px; margin-bottom: -20px;"> <!-- justify-content-start를 사용하여 왼쪽 정렬 -->
-        <a href="{% url 'user:index' %}">
-            <button class="btn btn-secondary" style="margin-left: 0;">메인 화면으로 돌아가기</button>
-        </a>
+    <div class="row justify-content-center">
+        <div class="col-md-12" style="max-width: 680px; padding-left: 32px; padding-right: 32px;  margin-bottom: -10px">
+            <a href="{% url 'user:index' %}">
+                <button class="btn btn-secondary" style="margin-left: 0;">메인 화면으로 돌아가기</button>
+            </a>
+        </div>
     </div>
 {% endblock %}
+
 
 {% block content %}
 <!DOCTYPE html>
