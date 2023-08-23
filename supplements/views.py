@@ -20,12 +20,12 @@ from django.core.files.base import ContentFile
 import base64
 import numpy as np
 
-""" # Create your views here.
+# Create your views here.
 # 영양소 상세 보기
-def nutrient_detail(request, nutrient_id):
-    nutrient = get_object_or_404(Nutrient, pk=nutrient_id)
-    return render(request, 'nutrient_detail.html', {'nutrient': nutrient})
-
+def nutrient_detail(request, nutrient_name):
+    nutrient = get_object_or_404(Nutrient, name=nutrient_name)
+    return render(request, 'supplements/nutrient_detail.html', {'nutrient': nutrient})
+"""
 # 영양소 상세 보기와 동의어 함께 보기
 def nutrient_detail_with_synonyms(request, nutrient_id):
     nutrient = get_object_or_404(Nutrient, pk=nutrient_id)

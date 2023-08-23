@@ -13,41 +13,40 @@ from .models import UserTotalIntake
 from supplements.models import RecommendedIntake, RecommendedNutrient
 from django.contrib import messages
 
-#퍼센트 계산
-def calculate_intake_percentage(user):
-    intake_percentages = {}
-    #사용자의 총섭취량 데이터 가져오기
-    user_intakes = UserTotalIntake.objects.filter(user=user)
-    #사용자의 적정섭취량 데이터 가져오기
-    recommended_intakes = {r.nutrient.name: r.dosage for r in RecommendedNutrient.objects.filter(recommended_intake=user.recommended)}
-
-    for intake in user_intakes:
-        nutrient_name = intake.nutrient.name
-        actual_dosage = intake.dosage
-        recommended_dosage = recommended_intakes.get(nutrient_name)
-
-        if recommended_dosage:
-            percentage = (actual_dosage / recommended_dosage) * 100
-            intake_percentages[nutrient_name] = percentage
-        else:
-            intake_percentages[nutrient_name] = None
-
-    return intake_percentages
-
-
 def index_view(request):
     # 로그인되어 있지 않은 사용자에 대해 로그인 페이지로 리디렉션
     if not request.user.is_authenticated:
         return redirect('login')
-
     supplements = Supplement.objects.filter(user=request.user)
-    total_intake = UserTotalIntake.objects.filter(user=request.user)
-    intake_percentages = calculate_intake_percentage(request.user)
+
+    intake_percentages = {}
+    #사용자의 총섭취량 데이터 가져오기
+    userdosage = {u.nutrient.name: u.dosage for u in UserTotalIntake.objects.filter(user=request.user)}
+    #사용자의 적정섭취량 데이터 가져오기
+    recommended_intakes = {r.nutrient.name: r.dosage for r in RecommendedNutrient.objects.filter(recommended_intake=request.user.recommended)}
+    limitnutrients = {qn.nutrient.name: qn.limit for qn in RecommendedNutrient.objects.filter(recommended_intake=request.user.recommended)}
+
+    overintake = {}
+    underintake = {}
+    remainintake = {}
+
+    for nutrient, dosage in userdosage.items():
+        recommendeddosage = recommended_intakes.get(nutrient)
+        limitdosage = limitnutrients.get(nutrient)
+        if recommendeddosage:
+            percentage = (dosage/ recommendeddosage) * 100
+            if limitdosage and limitdosage < dosage :
+                overintake[nutrient] = percentage
+            elif percentage < 50 :
+                underintake[nutrient] = percentage
+            else:
+                remainintake[nutrient] = percentage
 
     return render(request, 'user/index.html', {
         'supplements': supplements,
-        'total_intake': total_intake,
-        'intake_percentages': intake_percentages
+        'overintake': overintake,
+        'underintake': underintake,
+        'remainintake': remainintake
     })
 
 class SignUpView(CreateView):
