@@ -1,0 +1,17 @@
+/* styles.css */
+.nutrient-detail {
+    background-color: #f7f7f7;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.nutrient-title {
+    font-size: 24px;
+    margin-bottom: 10px;
+}
+
+.nutrient-info {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
