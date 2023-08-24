@@ -12,19 +12,21 @@ from PIL import Image, ImageDraw
 from io import BytesIO  # io 모듈에서 BytesIO를 import 합니다.
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-import os
+import os, sys
 from django.conf import settings
 from django.http import HttpResponseRedirect
 from django.urls import reverse
 from django.core.files.base import ContentFile
 import base64
 import numpy as np
+from .easyocr import easyocr
 
 # Create your views here.
 # 영양소 상세 보기
 def nutrient_detail(request, nutrient_name):
     nutrient = get_object_or_404(Nutrient, name=nutrient_name)
     return render(request, 'supplements/nutrient_detail.html', {'nutrient': nutrient})
+
 """
 # 영양소 상세 보기와 동의어 함께 보기
 def nutrient_detail_with_synonyms(request, nutrient_id):
@@ -105,94 +107,81 @@ def upload_image(request):
 
     return JsonResponse({'success': False, 'message': 'POST 요청이 아닙니다.'})
 
-###############정보추출함수 내놔..
 def extract_info_from_image(image_np):
+    os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
+
+    #모델 불러오기. 모델 학습이 완료되면 커스텀 모델로 불러오는데 경로 주의!!
+    reader = easyocr.Reader(['ko', 'en'])
+    # Using custom model
+    #reader = Reader(['ko'], gpu=True,
+    #                model_storage_directory='./workspace/user_network_dir',
+    #                user_network_directory='./workspace/user_network_dir',
+    #                recog_network='custom')
+
+    # 이미지 데이터를 .jpg 형식으로 변환하여 바이트로 인코딩합니다.
     _, image_file = cv2.imencode('.jpg', image_np)
     image_file_buffer = BytesIO(image_file)
 
+    # 이미지 데이터를 활용하여 텍스트를 추출합니다.
+    results = reader.readtext(image_file_buffer)
 
-    api_url = 'https://3g69izliq5.apigw.ntruss.com/custom/v1/23692/83af5a7f71fe00ce5a40c5be9622db4c5114ba6702fdc14ddb1b4b007e5ca726/general'
-    secret_key = 'UFRkQlFOSlhNUW5QS0FRamdtTnpOTWpjbmxGQ2JUek8='
-    # 이미지 파일을 API에 전송하기 위한 요청 데이터 생성
-    request_json = {
-        'images': [
-            {
-                'format': 'jpg',
-                'name': 'demo'
-            }
-        ],
-        'requestId': str(uuid.uuid4()),
-        'version': 'V2',
-        'timestamp': int(round(time.time() * 1000))
-    }
-    payload = {'message': json.dumps(request_json).encode('UTF-8')}
-    files = [
-        ('file', ('demo.jpg', image_file_buffer, 'image/jpeg'))  # 파일 대신 바이트 스트림 객체를 전달
-    ]
-    headers = {
-        'X-OCR-SECRET': secret_key
-    }
-    # API 요청 보내기
-    response = requests.post(api_url, headers=headers, data=payload, files=files)
-    # 응답 결과 확인
-    if response.status_code == 200:
-        output_json = response.json()
-        print(output_json)
-        extracted_text = []
-        start_extracting = False  # '1일'이 발견된 이후부터 추출 시작
-        for item in output_json['images'][0]['fields']:
-            bounding_box = item['boundingPoly']
-            vertices = bounding_box['vertices']
-            coordinates = [(v['x'], v['y']) for v in vertices]
-            # 텍스트 그리기
-            text = item['inferText']
-            if '1일' in text:
-                start_extracting = True
-            if start_extracting:
-                extracted_text.append(text)
-        extracted_text_str = ' '.join(extracted_text)  # 공백을 이용하여 하나의 줄로 합침
-        extracted_text_str = extracted_text_str.replace(" ", "")  # Remove all spaces from the text
-        print('추출된 텍스트:\n', extracted_text_str)  # 추출된 텍스트 확인
-        # 쉼표로 분리하여 리스트로 저장
-        lines = extracted_text_str.split(',')
-        print(lines)
-        # SQLite 데이터베이스에 연결
-        conn = sqlite3.connect('db.sqlite3')
-        cursor = conn.cursor()
-        cursor.execute('SELECT name, unit FROM supplements_nutrient')  # unit도 가져오도록 수정
-        nutrient_data_db = cursor.fetchall()
-        # 연결 종료
-        conn.close()
-        # 영양소 정보를 저장할 리스트 초기화
-        extracted_info = []
-        processed_nutrients = set()
-        # Extracted lines from OCR
-        for line in lines:
-            for nutrient_name_db, unit in nutrient_data_db:  # unit도 가져온 데이터에서 사용
-                if nutrient_name_db in line and nutrient_name_db not in processed_nutrients:
-                    if nutrient_name_db == "열량":
-                        value_start = line.find(nutrient_name_db) + len(nutrient_name_db)
-                        value_end = line.find("kcal", value_start) + len("kcal") + 1
-                    else:
-                        value_start = line.find(nutrient_name_db) + len(nutrient_name_db)
-                        value_end = line.find("g", value_start) + 1
-                    nutrient_value = line[value_start:value_end].strip()
-                    if not any(char.isdigit() for char in nutrient_value):
-                        continue
-                    # 추출한 값에서 단위를 제외한 숫자만 추출하여 저장
-                    nutrient_value = ''.join([c for c in nutrient_value if c.isdigit() or c == '.'])
-                    if nutrient_value:  # 빈 값을 방지하기 위해 확인
-                        nutrient_value = float(nutrient_value)  # 문자열을 숫자로 변환
-                    else:
-                        nutrient_value = 0.0
-                    processed_nutrients.add(nutrient_name_db)
-                    # 영양소 정보를 딕셔너리로 구성하여 리스트에 추가
-                    nutrient_info = {
-                        'name': nutrient_name_db,
-                        'dosage': nutrient_value,
-                        'unit': unit  # 데이터베이스에서 가져온 unit 사용
-                    }
-                    extracted_info.append(nutrient_info)
+    extracted_text = []
+    start_extracting = False # '1일'이 발견된 이후부터 추출 시작
+
+    # 추출된 텍스트 결과를 순회하며 "1일" 이후의 텍스트를 저장합니다.
+    for text in results:
+        if "1일" in text:
+            start_extracting = True
+        
+        if start_extracting:
+            extracted_text.append(text)
+
+    #하나의 문자열로 합치기
+    extracted_text_str = ''.join(extracted_text)  
+    print('추출된 텍스트:\n', extracted_text_str)  # 추출된 텍스트 확인
+    
+    # 쉼표로 분리하여 리스트로 저장
+    lines = extracted_text_str.split(',')
+
+    # SQLite 데이터베이스에 연결
+    conn = sqlite3.connect('db.sqlite3')
+    cursor = conn.cursor()
+    cursor.execute('SELECT name, unit FROM supplements_nutrient')  # unit도 가져오도록 수정
+    nutrient_data_db = cursor.fetchall()
+    # 연결 종료
+    conn.close()
+
+    # 영양소 정보를 저장할 리스트 초기화
+    extracted_info = []
+    processed_nutrients = set()
+
+    # Extracted lines from OCR
+    for line in lines:
+        for nutrient_name_db, unit in nutrient_data_db:  # unit도 가져온 데이터에서 사용
+            if nutrient_name_db in line and nutrient_name_db not in processed_nutrients:
+                if nutrient_name_db == "열량":
+                    value_start = line.find(nutrient_name_db) + len(nutrient_name_db)
+                    value_end = line.find("kcal", value_start) + len("kcal") + 1
+                else:
+                    value_start = line.find(nutrient_name_db) + len(nutrient_name_db)
+                    value_end = line.find("g", value_start) + 1
+                nutrient_value = line[value_start:value_end].strip()
+                if not any(char.isdigit() for char in nutrient_value):
+                    continue
+                # 추출한 값에서 단위를 제외한 숫자만 추출하여 저장
+                nutrient_value = ''.join([c for c in nutrient_value if c.isdigit() or c == '.'])
+                if nutrient_value:  # 빈 값을 방지하기 위해 확인
+                    nutrient_value = float(nutrient_value)  # 문자열을 숫자로 변환
+                else:
+                    nutrient_value = 0.0
+                processed_nutrients.add(nutrient_name_db)
+                # 영양소 정보를 딕셔너리로 구성하여 리스트에 추가
+                nutrient_info = {
+                    'name': nutrient_name_db,
+                    'dosage': nutrient_value,
+                    'unit': unit  # 데이터베이스에서 가져온 unit 사용
+                }
+                extracted_info.append(nutrient_info)
     return extracted_info
 
 def process_image(request):
