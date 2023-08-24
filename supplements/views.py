@@ -106,10 +106,12 @@ def extract_info_from_image(image_np):
     #                recog_network='custom')
 
     # 이미지 데이터를 .jpg 형식으로 변환하여 바이트로 인코딩합니다.
-    _, image_file = cv2.imencode('.jpg', image_np)
+    #_, image_file = cv2.imencode('.jpg', image_np)
 
     # 이미지 데이터를 활용하여 텍스트를 추출합니다.
-    results = reader.readtext(image_file)
+    results = reader.readtext(image_np, detail = 0)
+
+    print(results)
 
     extracted_text = []
     start_extracting = False # '1일'이 발견된 이후부터 추출 시작
