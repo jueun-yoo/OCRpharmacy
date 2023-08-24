@@ -233,9 +233,12 @@ def process_image(request):
 from django.shortcuts import render, redirect
 from .models import Supplement, SupplementNutrient, Nutrient
 from django.contrib import messages
+import logging
+
 
 def save_info(request):
     if request.method == 'POST':
+        print(request.POST)
         supplement_name = request.POST.get('supplement_name')        
 
         # 기존 보충제를 가져옵니다.
@@ -248,42 +251,40 @@ def save_info(request):
         while True:
             nutrient_name = request.POST.get(f'nutrients[{i}][name]')
             if nutrient_name is None:
-                break # 더 이상의 nutrients가 없을 경우 반복 종료
-            dosage = float(request.POST.get(f'nutrients[{i}][dosage]')) # 문자열을 부동소수점 숫자로 변환
+                break
+            dosage = float(request.POST.get(f'nutrients[{i}][dosage]'))
             nutrients_info.append((nutrient_name, dosage))
             i += 1
+        
+        new_nutrients_info = []
+        j = 0
+        while True:
+            new_nutrient_name = request.POST.get(f'new_nutrients[{j}][name]')
+            if new_nutrient_name is None:
+                break
+            new_dosage = float(request.POST.get(f'new_nutrients[{j}][dosage]'))
+            new_nutrients_info.append((new_nutrient_name, new_dosage))
+            j += 1
 
         for nutrient_name, dosage in nutrients_info:
             try:
-                # 영양소를 찾습니다.
                 nutrient = Nutrient.objects.get(name=nutrient_name)
                 unit = nutrient.unit
             except Nutrient.DoesNotExist:
-                # 해당 이름의 영양소가 없을 경우, 다음 영양소로 넘어갑니다.
                 continue
 
-            # SupplementNutrient 객체를 생성하고 연결합니다.
             supplement_nutrient = SupplementNutrient(nutrient=nutrient, supplement=supplement, dosage=dosage, unit=unit)
             supplement_nutrient.save()
+            
+        for new_nutrient_name, new_dosage in new_nutrients_info:
+            try:
+                nutrient = Nutrient.objects.get(name=new_nutrient_name)
+                unit = nutrient.unit
+            except Nutrient.DoesNotExist:
+                continue
 
-            for nutrient_name, dosage in nutrients_info:
-                try:
-                    # 영양소를 찾습니다.
-                    nutrient = Nutrient.objects.get(name=nutrient_name)
-                    unit = nutrient.unit
-                except Nutrient.DoesNotExist:
-                    # 해당 이름의 영양소가 없을 경우, 동의어에서 찾습니다.
-                    try:
-                        synonym = Synonym.objects.get(name=nutrient_name)
-                        nutrient = synonym.nutrient
-                        unit = nutrient.unit
-                    except Synonym.DoesNotExist:
-                        # 동의어에도 없을 경우, 다음 영양소로 넘어갑니다.
-                        continue
-
-                # SupplementNutrient 객체를 생성하고 연결합니다.
-                supplement_nutrient = SupplementNutrient(nutrient=nutrient, supplement=supplement, dosage=dosage, unit=unit)
-                supplement_nutrient.save()
+            supplement_nutrient = SupplementNutrient(nutrient=nutrient, supplement=supplement, dosage=new_dosage, unit=unit)
+            supplement_nutrient.save()
 
         return redirect('user:index')
 
