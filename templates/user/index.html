@@ -134,6 +134,20 @@
             </div>
         {% endfor %}
     </div>
+
+    <hr>
+    <h2 class="mb-4 mt-4"><b>상호작용</b></h2>
+    {% if interactions %}
+    <ul>
+        {% for interaction in interactions %}
+        <li>
+            <p>{{ interaction.contents }}</p>
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>상호작용이 없습니다.</p>
+    {% endif %}
 {% endblock %}
 
 {% block extra_js %}

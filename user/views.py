@@ -10,7 +10,7 @@ from django.views.generic.edit import CreateView
 from django.views.generic import ListView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .models import UserTotalIntake
-from supplements.models import RecommendedIntake, RecommendedNutrient
+from supplements.models import RecommendedIntake, RecommendedNutrient, Interaction
 from django.contrib import messages
 
 def index_view(request):
@@ -41,12 +41,27 @@ def index_view(request):
                 underintake[nutrient] = percentage
             else:
                 remainintake[nutrient] = percentage
+        # 상호작용 객체를 담을 빈 리스트를 만듭니다.
+    interactions = []
+
+    # 영양제의 SupplementNutrient 객체들 중에서 용량이 0이 아닌 것만 선택합니다.
+    user_nutrients_with_dosage = [usr_nut for usr_nut in UserTotalIntake.objects.filter(user=request.user) if usr_nut.dosage > 0]
+
+    # 모든 상호작용 객체를 순회합니다.
+    all_interactions = Interaction.objects.all()
+    for interaction in all_interactions:
+        # 상호작용의 두 성분이 모두 영양제에 포함되어 있고, 용량이 0이 아닌지 확인합니다.
+        if interaction.nutrient1 in [usr_nut.nutrient for usr_nut in user_nutrients_with_dosage] and interaction.nutrient2 in [usr_nut.nutrient for usr_nut in user_nutrients_with_dosage]:
+            # 두 성분이 모두 포함되어 있고 용량이 0이 아니라면 interactions 리스트에 추가합니다.
+            interactions.append(interaction)
+
 
     return render(request, 'user/index.html', {
         'supplements': supplements,
         'overintake': overintake,
         'underintake': underintake,
-        'remainintake': remainintake
+        'remainintake': remainintake,
+        'interactions': interactions
     })
 
 class SignUpView(CreateView):

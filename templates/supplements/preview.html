@@ -10,7 +10,6 @@
     </div>
 {% endblock %}
 
-
 {% block content %}
 <!DOCTYPE html>
 <html lang="ko">
@@ -35,7 +34,7 @@
     <div class="container">
         <h2><b>영양제 등록</b></h2>
         <hr>
-        <form action="{% url 'supplements:save_info' %}" method="post">
+        <form id="supplementForm" action="{% url 'supplements:save_info' %}" method="post">
             {% csrf_token %}
             <div class="form-group row">
                 <label for="supplement_name" class="col-form-label col-sm-2 mr-2">영양제 이름:</label> <!-- 여기에 mr-2 추가 -->
@@ -52,7 +51,7 @@
                         <th>단위</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="nutrientTable">
                     {% for nutrient in info.nutrients %}
                         <tr>
                             <td><input type="text" name="nutrients[{{ forloop.counter0 }}][name]" value="{{ nutrient.name }}" class="form-control" /></td>
@@ -62,9 +61,29 @@
                     {% endfor %}
                 </tbody>
             </table>
+            <button type="button" id="addRowBtn" class="btn btn-success">+</button> <!-- +버튼 추가 -->
             <button type="submit" class="btn btn-primary">저장</button>
         </form>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const addRowBtn = document.getElementById('addRowBtn');
+            const tableBody = document.querySelector('#nutrientTable');
+            
+            let rowCount = 0;  // 추가된 행 개수를 저장할 변수
+    
+            addRowBtn.addEventListener('click', function () {
+                const newRow = document.createElement('tr');
+                newRow.innerHTML = `
+                    <td><input type="text" name="new_nutrients[${rowCount}][name]" class="form-control" /></td>
+                    <td><input type="text" name="new_nutrients[${rowCount}][dosage]" class="form-control" /></td>
+                    <td></td>
+                `;
+                tableBody.appendChild(newRow);
+                rowCount++;  // 추가된 행 개수 증가
+            });
+        });
+    </script>
 </body>
 </html>
 {% endblock %}
