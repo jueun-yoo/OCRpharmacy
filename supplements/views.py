@@ -20,7 +20,8 @@ from django.core.files.base import ContentFile
 import base64
 import numpy as np
 import random
-from .easyocr import easyocr
+sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
+from easyocr.easyocr import *
 
 # Create your views here.
 # 영양소 상세 보기
@@ -97,7 +98,7 @@ def extract_info_from_image(image_np):
     os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
 
     #모델 불러오기. 모델 학습이 완료되면 커스텀 모델로 불러오는데 경로 주의!!
-    reader = easyocr.Reader(['ko', 'en'])
+    reader = Reader(['ko', 'en'])
     # Using custom model
     #reader = Reader(['ko'], gpu=True,
     #                model_storage_directory='./workspace/user_network_dir',
@@ -106,10 +107,9 @@ def extract_info_from_image(image_np):
 
     # 이미지 데이터를 .jpg 형식으로 변환하여 바이트로 인코딩합니다.
     _, image_file = cv2.imencode('.jpg', image_np)
-    image_file_buffer = BytesIO(image_file)
 
     # 이미지 데이터를 활용하여 텍스트를 추출합니다.
-    results = reader.readtext(image_file_buffer)
+    results = reader.readtext(image_file)
 
     extracted_text = []
     start_extracting = False # '1일'이 발견된 이후부터 추출 시작
