@@ -21,9 +21,8 @@ import base64
 import numpy as np
 import random
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
-from easyocr.easyocr import *
+from easyocr import *
 
-# Create your views here.
 # 영양소 상세 보기
 def nutrient_detail(request, nutrient_name):
     nutrient = get_object_or_404(Nutrient, name=nutrient_name)
@@ -98,12 +97,12 @@ def extract_info_from_image(image_np):
     os.environ['CUDA_VISIBLE_DEVICES'] = '0,1'
 
     #모델 불러오기. 모델 학습이 완료되면 커스텀 모델로 불러오는데 경로 주의!!
-    reader = Reader(['ko', 'en'])
+    #reader = Reader(['ko', 'en'])
     # Using custom model
-    #reader = Reader(['ko'], gpu=True,
-    #                model_storage_directory='./workspace/user_network_dir',
-    #                user_network_directory='./workspace/user_network_dir',
-    #                recog_network='custom')
+    reader = Reader(['ko'], gpu=True,
+                    model_storage_directory='./easyocr/custom/user_network_dir',
+                    user_network_directory='./easyocr/custom/user_network_dir',
+                    recog_network='custom')
 
     # 이미지 데이터를 .jpg 형식으로 변환하여 바이트로 인코딩합니다.
     #_, image_file = cv2.imencode('.jpg', image_np)
