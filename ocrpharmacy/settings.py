@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'user.apps.UserConfig',
     'supplements.apps.SupplementsConfig',
     'django_bootstrap5',
-    'easyocr'  
+    'easyocr',
 ]
 
 
