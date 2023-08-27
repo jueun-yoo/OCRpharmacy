@@ -260,7 +260,13 @@ def save_info(request):
                 nutrient = Nutrient.objects.get(name=nutrient_name)
                 unit = nutrient.unit
             except Nutrient.DoesNotExist:
-                continue
+                try:
+                    synonym = Synonym.objects.get(name=nutrient_name)
+                    nutrient = synonym.nutrient
+                    unit = nutrient.unit
+                except Synonym.DoesNotExist:
+                    # 동의어에도 없을 경우, 다음 영양소로 넘어갑니다.
+                    continue
 
             supplement_nutrient = SupplementNutrient(nutrient=nutrient, supplement=supplement, dosage=dosage, unit=unit)
             supplement_nutrient.save()
@@ -270,7 +276,13 @@ def save_info(request):
                 nutrient = Nutrient.objects.get(name=new_nutrient_name)
                 unit = nutrient.unit
             except Nutrient.DoesNotExist:
-                continue
+                try:
+                    synonym = Synonym.objects.get(name=new_nutrient_name)
+                    nutrient = synonym.nutrient
+                    unit = nutrient.unit
+                except Synonym.DoesNotExist:
+                    # 동의어에도 없을 경우, 다음 영양소로 넘어갑니다.
+                    continue
 
             supplement_nutrient = SupplementNutrient(nutrient=nutrient, supplement=supplement, dosage=new_dosage, unit=unit)
             supplement_nutrient.save()
