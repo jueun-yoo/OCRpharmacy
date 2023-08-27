@@ -12,13 +12,7 @@ def add_supplements_synonym(name, nutrient_id):
     cursor.execute(sql, (name, nutrient_id))
     conn.commit()
 
-
-# 데이터 추가 예시
-
-# add_supplements_synonym("비타민B1", "10") # 티아민 동의어 추가
-# add_supplements_synonym("비타민B2", "11") # 리보플라민 동의어 추가
-
-
+"""
 add_supplements_synonym("레티놀", "비타민A") # 비타민A 동의어 추가
 add_supplements_synonym("레티놀산", "비타민A") # 비타민A 동의어 추가
 
@@ -84,35 +78,106 @@ add_supplements_synonym("셀레노시스테인", "셀레늄") # 셀레늄 동의
 
 
 add_supplements_synonym("몰리브데넘", "몰데브덴") # 몰리브덴 동의어 추가
-
-
-
-
-
-
-# 원하는 만큼 데이터를 추가할 수 있습니다.
-
 """
-# 데이터 수정
-def update_synonym(old_id, new_id):
-    sql = "UPDATE supplements_synonym SET nutrient_id = ? WHERE nutrient_id = ?"
-    cursor.execute(sql, (new_id, old_id))
-    conn.commit()
 
-# 데이터 수정 예시
-update_synonym(5, "비타민A")
-update_synonym(6, "비타민D")
-update_synonym(7, "비타민E")
-update_synonym(8, "비타민K")
-update_synonym(9, "비타민C")
-update_synonym(12, "나이아신")
-update_synonym(13, "비타민B6")
-update_synonym(14, "엽산")
-update_synonym(15, "비타민B12")
-update_synonym(16, "판토텐산산")
-update_synonym(17, "비오틴")
-update_synonym(30, "셀레늄")
-update_synonym(31, "몰데브덴")
-"""
+add_supplements_synonym("Calories", "열량")
+add_supplements_synonym("calories", "열량")
+add_supplements_synonym("Protein", "단백질")
+add_supplements_synonym("protein", "단백질")
+add_supplements_synonym("DietaryFieber", "식이섬유")
+add_supplements_synonym("dietaryfiber", "식이섬유")
+add_supplements_synonym("Water", "수분")
+add_supplements_synonym("water", "수분")
+add_supplements_synonym("VitaminA", "비타민A")
+add_supplements_synonym("vitaminA", "비타민A")
+add_supplements_synonym("VitaminD", "비타민D")
+add_supplements_synonym("vitaminD", "비타민D")
+add_supplements_synonym("VitaminE", "비타민E")
+add_supplements_synonym("vitaminE", "비타민E")
+add_supplements_synonym("VitaminK", "비타민K")
+add_supplements_synonym("vitaminK", "비타민K")
+add_supplements_synonym("VitaminC", "비타민C")
+add_supplements_synonym("vitaminC", "비타민C")
+add_supplements_synonym("Thiamin", "티아민")
+add_supplements_synonym("thiamin", "티아민")
+add_supplements_synonym("VitaminB1", "티아민")
+add_supplements_synonym("vitaminB1", "티아민")
+add_supplements_synonym("Riboflavin", "리보플라민")
+add_supplements_synonym("riboflavin", "리보플라민")
+add_supplements_synonym("VitaminB2", "리보플라민")
+add_supplements_synonym("vitaminb2", "리보플라민")
+add_supplements_synonym("Niacin", "나이아신")
+add_supplements_synonym("niacin", "나이아신")
+add_supplements_synonym("VitaminB3", "나이아신")
+add_supplements_synonym("vitaminB3", "나이아신")
+add_supplements_synonym("VitaminB6", "비타민B6")
+add_supplements_synonym("vitaminB6", "비타민B6")
+add_supplements_synonym("Floate", "엽산")
+add_supplements_synonym("floate", "엽산")
+add_supplements_synonym("VitaminB9", "엽산")
+add_supplements_synonym("vitaminB9", "엽산")
+add_supplements_synonym("VitaminB12", "비타민B12")
+add_supplements_synonym("vitaminB12", "비타민B12")
+add_supplements_synonym("PantothenicAcid", "판토텐산")
+add_supplements_synonym("pantothenicacid", "판토텐산")
+add_supplements_synonym("Biotin", "비오틴")
+add_supplements_synonym("biotin", "비오틴")
+add_supplements_synonym("Calcium", "칼슘")
+add_supplements_synonym("calcium", "칼슘")
+add_supplements_synonym("Phosphorus", "인")
+add_supplements_synonym("phosphorus", "인")
+add_supplements_synonym("Sodium", "나트륨")
+add_supplements_synonym("sodium", "나트륨")
+add_supplements_synonym("Potassium", "칼륨")
+add_supplements_synonym("potassium", "칼륨")
+add_supplements_synonym("Magnesium", "마그네슘")
+add_supplements_synonym("magnesium", "마그네슘")
+add_supplements_synonym("Iron", "철")
+add_supplements_synonym("iron", "철")
+add_supplements_synonym("Zinc", "아연")
+add_supplements_synonym("zinc", "아연")
+add_supplements_synonym("Copper", "구리")
+add_supplements_synonym("copper", "구리")
+add_supplements_synonym("Fluorine", "불소")
+add_supplements_synonym("fluorine", "불소")
+add_supplements_synonym("Manganese", "망간")
+add_supplements_synonym("manganese", "망간")
+add_supplements_synonym("Iodine", "요오드")
+add_supplements_synonym("iodine", "요오드")
+add_supplements_synonym("Selenium", "셀레늄")
+add_supplements_synonym("selenium", "셀레늄")
+add_supplements_synonym("Molybdenum", "몰데브덴")
+add_supplements_synonym("molybdenum", "몰데브덴")
+add_supplements_synonym("Prednisolone", "프레드니솔론")
+add_supplements_synonym("prednisolone", "프레드니솔론")
+add_supplements_synonym("Beta-Carotene", "베타카로틴")
+add_supplements_synonym("BetaCarotene", "베타카로틴")
+add_supplements_synonym("beta-carotene", "베타카로틴")
+add_supplements_synonym("betacarotene", "베타카로틴")
+add_supplements_synonym("Xenical", "제니칼")
+add_supplements_synonym("xenical", "제니칼")
+add_supplements_synonym("Cholestyramine", "콜레스티라민")
+add_supplements_synonym("cholestyramine", "콜레스티라민")
+add_supplements_synonym("Phenobarbital", "페노바르비탈")
+add_supplements_synonym("phenobarbital", "페노바르비탈")
+add_supplements_synonym("Phenytoin", "페니토인")
+add_supplements_synonym("phenytoin", "페니토인")
+add_supplements_synonym("Furosemide", "푸로세미드")
+add_supplements_synonym("furosemide", "푸로세미드")
+add_supplements_synonym("Fluorouracil", "플루오로우라실")
+add_supplements_synonym("fluorouracil", "플루오로우라실")
+add_supplements_synonym("ValproicAcid", "발프론산")
+add_supplements_synonym("valproicacid", "발프론산")
+add_supplements_synonym("Carbamazepine", "카바마제핀")
+add_supplements_synonym("carbamazepine", "카바마제핀")
+add_supplements_synonym("Cycloserine", "사이클로세린")
+add_supplements_synonym("cycloserine", "사이클로세린")
+add_supplements_synonym("Chloramphenicol", "클로람페니콜")
+add_supplements_synonym("chloramphenicol", "클로람페니콜")
+add_supplements_synonym("Metformin", "메트포르민")
+add_supplements_synonym("metformin", "메트포르민")
+
+
+
 # 연결 닫기 (중요)
 conn.close()
